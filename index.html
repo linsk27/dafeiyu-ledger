@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/assets/fish-work.webp" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#FDF6F4" />
+    <title>大肥鱼账本</title>
+
+    <!--
+      字体在首屏渲染前取回：URL 必须和 styles.css 里的 @font-face 完全一致（含 ?v=1），
+      否则浏览器会把同一个文件再下一次。
+    -->
+    <link
+      rel="preload"
+      href="/fonts/zcool-kuaile-cn.woff2?v=1"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href="/fonts/baloo-2-500.woff2?v=1" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/baloo-2-600.woff2?v=1" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/baloo-2-700.woff2?v=1" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/loading-fish.webp" as="image" type="image/webp" />
+
+    <!-- 启动占位：写在 HTML 里，JS 还没解析时就能看到，不依赖任何外部样式表 -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+
+      body {
+        background: #fdf6f4;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+        background:
+          radial-gradient(1100px 620px at 8% -10%, #ffe7ef 0%, rgba(255, 231, 239, 0) 62%),
+          radial-gradient(980px 640px at 102% -4%, #dfe9ff 0%, rgba(223, 233, 255, 0) 58%),
+          linear-gradient(180deg, #fffaf7 0%, #f4f7ff 100%);
+        transition: opacity 0.36s ease;
+      }
+
+      #boot.boot--out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #boot .boot__fish {
+        width: min(52vw, 236px);
+        height: auto;
+        filter: drop-shadow(0 18px 24px rgba(52, 78, 140, 0.18));
+        animation: bootBob 1.7s ease-in-out infinite;
+      }
+
+      #boot .boot__text {
+        margin: 4px 0 0;
+        font: 500 14px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        letter-spacing: 0.04em;
+        color: #7b869e;
+      }
+
+      #boot .boot__dots {
+        display: flex;
+        gap: 6px;
+      }
+
+      #boot .boot__dots i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #3f6fe4;
+        opacity: 0.22;
+        animation: bootDot 1.15s ease-in-out infinite;
+      }
+
+      #boot .boot__dots i:nth-child(2) {
+        animation-delay: 0.16s;
+      }
+
+      #boot .boot__dots i:nth-child(3) {
+        animation-delay: 0.32s;
+      }
+
+      @keyframes bootBob {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-1.2deg);
+        }
+        50% {
+          transform: translateY(-9px) rotate(1.2deg);
+        }
+      }
+
+      @keyframes bootDot {
+        0%,
+        100% {
+          opacity: 0.2;
+          transform: translateY(0);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(-4px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #boot .boot__fish,
+        #boot .boot__dots i {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="boot">
+      <img class="boot__fish" src="/assets/loading-fish.webp" alt="" width="483" height="620" />
+      <p class="boot__text">大肥鱼正抱着算盘跑过来…</p>
+      <span class="boot__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

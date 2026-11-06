@@ -1,0 +1,18 @@
+# 依赖 / 构建产物
+node_modules/
+dist/
+.tmp/
+*.log
+.DS_Store
+
+# Capacitor 生成的 Android 产物
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# 本地产物（APK 走 GitHub Releases）
+release/*.apk

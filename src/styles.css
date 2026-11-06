@@ -1120,14 +1120,64 @@ button {
     height: auto;
     flex-direction: row;
     align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
+    gap: 12px;
+    padding: 12px 14px;
     border-radius: 26px;
+    /* 顶栏是固定宽度，里面一律不许越界 */
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .brand {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: 2px 2px;
+    gap: 10px;
+  }
+
+  .brand__name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .nav {
     flex-direction: row;
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  /* 关键：两个 tab 等分可用宽度，允许收缩，文字超出就省略号 */
+  .nav__item {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .nav__text {
+    min-width: 0;
+  }
+
+  .nav__label {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    flex: none;
+  }
+
+  .nav__pill {
+    border-radius: 16px;
   }
 
   .nav__hint,
@@ -2665,35 +2715,31 @@ textarea,
   }
 }
 
-/* ---------- 手机：表单压扁 + 页脚归位 ---------- */
-@media (max-width: 560px) {
-  .formGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 10px;
+/* ---------- 窄手机：品牌收起文字，tab 撑满 ---------- */
+@media (max-width: 470px) {
+  .brand__name,
+  .brand__sub {
+    display: none;
   }
 
-  .formGrid > .field:nth-child(1),
-  .formGrid > .field:nth-child(2) {
-    grid-column: 1 / -1;
+  .brand {
+    padding: 0;
+    gap: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav__item {
+    padding: 8px 6px;
+    gap: 6px;
   }
 
-  .formGrid > .field:nth-child(n + 3) .input {
-    height: 44px;
+  .nav__label {
+    font-size: 13px;
   }
 
-  .formGrid > .field:nth-child(n + 3) .input input {
-    font-size: 15px;
+  .nav__icon {
+    width: 24px;
+    height: 24px;
   }
-
-  .field__label {
-    margin-bottom: 5px;
-    font-size: 12.5px;
-  }
-
-  /* 右列的时间面板改成右对齐，否则 216px 的面板会顶出屏幕 */
-  .formGrid > .timeField:nth-child(even) .timePop {
-    left: auto;
-    right: 0;
-  }
-
 }

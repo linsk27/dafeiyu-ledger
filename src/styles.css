@@ -115,10 +115,9 @@ button {
   gap: 26px;
   padding: 24px 18px 20px;
   border-radius: 32px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(18px);
 }
 
 .brand {
@@ -506,7 +505,6 @@ button {
 .stage__deco {
   position: absolute;
   border-radius: 50%;
-  filter: blur(2px);
   opacity: 0.55;
   z-index: 0;
 }
@@ -645,7 +643,6 @@ button {
   height: 30px;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(39, 52, 111, 0.22), rgba(39, 52, 111, 0) 72%);
-  filter: blur(2px);
   z-index: 1;
 }
 
@@ -735,10 +732,9 @@ button {
   position: relative;
   padding: 12px 28px 14px;
   border-radius: 26px;
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.93);
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 22px 44px -30px rgba(39, 52, 111, 0.6);
-  backdrop-filter: blur(12px);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
   text-align: center;
 }
@@ -1140,7 +1136,14 @@ button {
   }
 
   .main {
-    padding: 0 0 20px;
+    padding: 0 0 18px;
+  }
+
+  /* 顶栏布局下 .app 是竖向的，页脚回到文档流，不会压在表单上 */
+  .siteFoot {
+    position: static;
+    align-self: center;
+    margin: 0 0 12px;
   }
 
   .salaryGrid {
@@ -2660,4 +2663,37 @@ textarea,
   .onboard__text br {
     display: none;
   }
+}
+
+/* ---------- 手机：表单压扁 + 页脚归位 ---------- */
+@media (max-width: 560px) {
+  .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 10px;
+  }
+
+  .formGrid > .field:nth-child(1),
+  .formGrid > .field:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .formGrid > .field:nth-child(n + 3) .input {
+    height: 44px;
+  }
+
+  .formGrid > .field:nth-child(n + 3) .input input {
+    font-size: 15px;
+  }
+
+  .field__label {
+    margin-bottom: 5px;
+    font-size: 12.5px;
+  }
+
+  /* 右列的时间面板改成右对齐，否则 216px 的面板会顶出屏幕 */
+  .formGrid > .timeField:nth-child(even) .timePop {
+    left: auto;
+    right: 0;
+  }
+
 }

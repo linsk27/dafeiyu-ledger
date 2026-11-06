@@ -17,8 +17,7 @@ import {
   type SalaryConfig,
 } from './lib/salary'
 
-export default function App() {
-  const [tab, setTab] = useState<Tab>(() =>
+export default function App() {  const [tab, setTab] = useState<Tab>(() =>
     window.location.hash.replace('#/', '') === 'salary' ? 'salary' : 'ledger',
   )
   // null = 这台设备上还没设置过工资，走引导页
@@ -43,6 +42,9 @@ export default function App() {
     const id = window.setInterval(() => setNow(new Date()), 1000)
     return () => window.clearInterval(id)
   }, [])
+
+  /** 窄屏（手机）直接换页，不做转场 —— 两层页面同时重绘太重，会掉帧 */
+  const narrow = useNarrowScreen()
 
   useEffect(() => {
     if (!toast) return
@@ -96,13 +98,13 @@ export default function App() {
       <Sidebar tab={tab} onChange={setTab} />
 
       <main className="main">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={tab}
-            initial={{ opacity: 0, y: 12 }}
+            initial={narrow ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.24, ease: 'easeOut' }}
+            exit={narrow ? { opacity: 1 } : { opacity: 0, y: -8 }}
+            transition={narrow ? { duration: 0 } : { duration: 0.24, ease: 'easeOut' }}
           >
             {tab === 'ledger' ? (
               <LedgerPage
@@ -150,4 +152,18 @@ export default function App() {
       </AnimatePresence>
     </div>
   )
+}
+
+/** 窄屏判定：手机上一律不做转场动画，直接换页最跟手 */
+function useNarrowScreen() {
+  const query = '(max-width: 700px)'
+  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const sync = () => setNarrow(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+  return narrow
 }

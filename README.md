@@ -1,7 +1,24 @@
 # 大肥鱼账本 · Dafeiyu Ledger
 
 可爱风的「看着钱一秒一秒长出来」账本 —— 本质是个**牛马激励器**。
-React 19 + Vite 6 + TypeScript + framer-motion。
+
+<p>
+  <a href="https://github.com/linsk27/dafeiyu-ledger/releases/latest"><img alt="下载 APK" src="https://img.shields.io/github/v/release/linsk27/dafeiyu-ledger?label=APK&color=4b7bf5"></a>
+  <a href="https://github.com/linsk27/dafeiyu-ledger/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/linsk27/dafeiyu-ledger?color=0fb87c"></a>
+  <img alt="Android" src="https://img.shields.io/badge/Android-7.0%2B-3ddc84">
+</p>
+
+上班的时候打开它，大肥鱼就戴着牛头帽在打算盘，头顶的数字跟着秒针往上跳；
+下班回家，它变成躺在钱堆里发光的样子。
+
+> 📱 **[下载 Android APK](https://github.com/linsk27/dafeiyu-ledger/releases/latest)** ·
+> 💻 网页版：`pnpm install && pnpm dev`
+
+技术栈：React 19 + Vite 6 + TypeScript + framer-motion + Capacitor 7。
+
+> ⚖️ 代码是 MIT。但**角色美术不在此列**：大肥鱼是社区同人形象（表情包来自
+> [diwer/ai-biaoqingbao](https://github.com/diwer/ai-biaoqingbao)，CC BY-NC-SA 4.0，角色设计 ZipZipPipe、上善无形），
+> 仓库里的立绘由作者提供，只用于这个项目，请勿商用或二次分发。
 
 ## 跑起来
 

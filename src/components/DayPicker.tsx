@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { isoDate, monthWorkdays } from '../lib/salary'
 
 interface Props {
-  /** 选中的日期（YYYY-MM-DD） */
+  /** 选中的日期（YYYY-MM-DD），固定落在一个月内 */
   value: string[]
   onChange: (days: string[]) => void
 }
@@ -10,36 +10,35 @@ interface Props {
 const WEEK = ['一', '二', '三', '四', '五', '六', '日']
 
 /**
- * 手动计薪日：一个月历，点哪天算哪天。
- * 默认按「周一~周五」预选，所以调休补班点一下、法定节假日再点一下就改好了。
+ * 手动计薪日：月历，点哪天算哪天。
+ * 计薪天数是「月薪 ÷ 这个数」，所以只认一个月，不跨月累加；
+ * 换月时按新月份的周一~周五重新预选，再手动改差异。
  */
 export function DayPicker({ value, onChange }: Props) {
   const today = new Date()
-  const [ym, setYm] = useState(() => {
+  const [view, setView] = useState(() => {
     const first = value[0] ? new Date(`${value[0]}T00:00:00`) : today
     return { y: first.getFullYear(), m: first.getMonth() }
   })
 
+  const monthDays = useMemo(() => monthWorkdays(view.y, view.m), [view])
   const picked = useMemo(() => new Set(value), [value])
 
   const cells = useMemo(() => {
-    const total = new Date(ym.y, ym.m + 1, 0).getDate()
-    // 周一为一周第一天
-    const lead = (new Date(ym.y, ym.m, 1).getDay() + 6) % 7
+    const total = new Date(view.y, view.m + 1, 0).getDate()
+    const lead = (new Date(view.y, view.m, 1).getDay() + 6) % 7 // 周一为第一列
     const list: (string | null)[] = Array.from({ length: lead }, () => null)
-    for (let d = 1; d <= total; d += 1) list.push(isoDate(new Date(ym.y, ym.m, d)))
+    for (let d = 1; d <= total; d += 1) list.push(isoDate(new Date(view.y, view.m, d)))
     while (list.length % 7 !== 0) list.push(null)
     return list
-  }, [ym])
-
-  const monthDays = useMemo(() => monthWorkdays(ym.y, ym.m), [ym])
-  // 计数按「这个月选中的全部日子」算，包括手动补上来的周末
-  const monthPrefix = `${ym.y}-${String(ym.m + 1).padStart(2, '0')}`
-  const inThisMonth = value.filter((d) => d.startsWith(monthPrefix)).length
+  }, [view])
 
   const shiftMonth = (delta: number) => {
-    const d = new Date(ym.y, ym.m + delta, 1)
-    setYm({ y: d.getFullYear(), m: d.getMonth() })
+    const next = new Date(view.y, view.m + delta, 1)
+    const ym = { y: next.getFullYear(), m: next.getMonth() }
+    setView(ym)
+    // 换月就不跨月累加，直接按新月份的周一~周五重新预选
+    onChange(monthWorkdays(ym.y, ym.m))
   }
 
   const toggle = (iso: string) => {
@@ -47,12 +46,6 @@ export function DayPicker({ value, onChange }: Props) {
     if (next.has(iso)) next.delete(iso)
     else next.add(iso)
     onChange([...next].sort())
-  }
-
-  /** 只改当前月，别把其它月选的清掉 */
-  const setMonthSelection = (days: string[]) => {
-    const keep = value.filter((d) => !d.startsWith(monthPrefix))
-    onChange([...keep, ...days].sort())
   }
 
   const todayIso = isoDate(today)
@@ -64,12 +57,12 @@ export function DayPicker({ value, onChange }: Props) {
           ‹
         </button>
         <b className="dayPick__month">
-          {ym.y} 年 {ym.m + 1} 月
+          {view.y} 年 {view.m + 1} 月
         </b>
         <button type="button" className="dayPick__nav" onClick={() => shiftMonth(1)} aria-label="下个月">
           ›
         </button>
-        <span className="dayPick__count">本月已选 {inThisMonth} 天</span>
+        <span className="dayPick__count">已选 {value.length} 天</span>
       </div>
 
       <div className="dayPick__week">
@@ -83,50 +76,50 @@ export function DayPicker({ value, onChange }: Props) {
       <div className="dayPick__grid">
         {cells.map((iso, i) => {
           if (!iso) return <span key={`x${i}`} className="dayPick__blank" />
-          const day = Number(iso.slice(-2))
-          const on = picked.has(iso)
-          const isWeekend = !monthDays.includes(iso)
+          const weekend = !monthDays.includes(iso)
           return (
             <button
               key={iso}
               type="button"
               className={[
                 'dayPick__day',
-                on ? 'is-on' : '',
-                isWeekend ? 'is-weekend' : '',
+                picked.has(iso) ? 'is-on' : '',
+                weekend ? 'is-weekend' : '',
                 iso === todayIso ? 'is-today' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
               onClick={() => toggle(iso)}
             >
-              {day}
+              {Number(iso.slice(-2))}
             </button>
           )
         })}
       </div>
 
       <div className="dayPick__actions">
-        <button type="button" onClick={() => setMonthSelection(monthDays)}>
+        <button type="button" onClick={() => onChange(monthDays)}>
           只选工作日
         </button>
         <button
           type="button"
           onClick={() => {
-            const total = new Date(ym.y, ym.m + 1, 0).getDate()
-            setMonthSelection(
-              Array.from({ length: total }, (_, i) => isoDate(new Date(ym.y, ym.m, i + 1))),
+            const total = new Date(view.y, view.m + 1, 0).getDate()
+            onChange(
+              Array.from({ length: total }, (_, i) => isoDate(new Date(view.y, view.m, i + 1))),
             )
           }}
         >
           全选本月
         </button>
-        <button type="button" onClick={() => setMonthSelection([])}>
-          清空本月
+        <button type="button" onClick={() => onChange([])}>
+          清空
         </button>
       </div>
 
-      <p className="dayPick__tip">法定节假日点掉、调休补班的周六点上来，天数据此重算。</p>
+      <p className="dayPick__tip">
+        法定节假日点掉、调休补班的周六点上来；换月会按新月份的工作日重新预选。
+      </p>
     </div>
   )
 }

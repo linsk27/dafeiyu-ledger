@@ -141,7 +141,7 @@ export function SalaryPage({ config, onSave }: Props) {
               {draft.workDays === null ? (
                 <span className="field__note">当月周一至周五，{preview.payDays} 天</span>
               ) : (
-                <span className="field__note">已勾 {draft.workDays.length} 天，可跨月</span>
+                <span className="field__note">按日历勾，只算这一个月</span>
               )}
             </div>
 

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { SparkIcon, WalletIcon } from '../components/Icons'
 import { TimeField } from '../components/TimeField'
 import {
+  breakInfo,
   clampConfig,
   dailySalary,
   fmtMoney,
@@ -10,7 +11,6 @@ import {
   payDaysOf,
   perHour,
   perSecond,
-  timeline,
   workSeconds,
   type SalaryConfig,
 } from '../lib/salary'
@@ -24,13 +24,14 @@ const START_PRESETS = ['08:30', '09:00', '09:30', '10:00']
 const END_PRESETS = ['17:30', '18:00', '18:30', '19:00']
 const LUNCH_START_PRESETS = ['11:30', '12:00', '12:30']
 const LUNCH_END_PRESETS = ['13:00', '13:30', '14:00']
+const DINNER_START_PRESETS = ['17:30', '18:00', '18:30']
+const DINNER_END_PRESETS = ['18:30', '19:00', '19:30']
 
 export function SalaryPage({ config, onSave }: Props) {
   const [draft, setDraft] = useState<SalaryConfig>(config)
   const now = new Date()
 
   const auto = payDaysAuto(now)
-  const tl = timeline(draft)
 
   const preview = useMemo(() => {
     const c = clampConfig(draft)
@@ -39,7 +40,12 @@ export function SalaryPage({ config, onSave }: Props) {
       hourly: perHour(c, now),
       second: perSecond(c, now),
       hours: workSeconds(c) / 3600,
-      lunch: timeline(c).lunch,
+      lunch: breakInfo(c, 'lunch').span
+        ? (breakInfo(c, 'lunch').span!.to - breakInfo(c, 'lunch').span!.from)
+        : 0,
+      dinner: breakInfo(c, 'dinner').span
+        ? (breakInfo(c, 'dinner').span!.to - breakInfo(c, 'dinner').span!.from)
+        : 0,
       payDays: payDaysOf(c, now),
     }
   }, [draft, now])
@@ -47,8 +53,10 @@ export function SalaryPage({ config, onSave }: Props) {
   const update = <K extends keyof SalaryConfig>(key: K, value: SalaryConfig[K]) =>
     setDraft((d) => ({ ...d, [key]: value }))
 
-  const lunchInvalid = tl.lunch === 0
-  const lunchOutside = tl.lunch > 0 && (tl.ls < tl.s || tl.le > tl.e)
+  const lunch = breakInfo(draft, 'lunch')
+  const dinner = breakInfo(draft, 'dinner')
+  const lunchMinutes = lunch.span ? lunch.span.to - lunch.span.from : 0
+  const dinnerMinutes = dinner.span ? dinner.span.to - dinner.span.from : 0
 
   return (
     <div className="page page--salary">
@@ -147,28 +155,64 @@ export function SalaryPage({ config, onSave }: Props) {
               onChange={(v) => update('end', v)}
               presets={END_PRESETS}
             />
+            <BreakHead
+              title="午休"
+              note={lunch.on ? (lunch.invalid ? '起止一样' : `${lunchMinutes} 分钟`) : '没有午休'}
+              on={draft.lunchOn}
+              onToggle={() => update('lunchOn', !draft.lunchOn)}
+            />
             <TimeField
               label="午休开始"
               value={draft.lunchStart}
               onChange={(v) => update('lunchStart', v)}
               presets={LUNCH_START_PRESETS}
-              hint="不计薪"
+              hint={draft.lunchOn ? '不计薪' : undefined}
+              disabled={!draft.lunchOn}
             />
             <TimeField
               label="午休结束"
               value={draft.lunchEnd}
               onChange={(v) => update('lunchEnd', v)}
               presets={LUNCH_END_PRESETS}
+              disabled={!draft.lunchOn}
             />
-          </div>
+            {lunch.on && (lunch.invalid || lunch.outside) && (
+              <p className="formWarn">
+                {lunch.invalid
+                  ? '午休起止时间一样，先按「没有午休」算。'
+                  : '午休有一段在上下班之外，只扣班内那一段。'}
+              </p>
+            )}
 
-          {(lunchInvalid || lunchOutside) && (
-            <p className="formWarn">
-              {lunchInvalid
-                ? '午休起止时间相同或顺序反了，按「没有午休」计算。'
-                : '午休有部分落在上下班时间之外，只扣落在班内的那一段。'}
-            </p>
-          )}
+            <BreakHead
+              title="晚休"
+              note={dinner.on ? (dinner.invalid ? '起止一样' : `${dinnerMinutes} 分钟`) : '没有晚休'}
+              on={draft.dinnerOn}
+              onToggle={() => update('dinnerOn', !draft.dinnerOn)}
+            />
+            <TimeField
+              label="晚休开始"
+              value={draft.dinnerStart}
+              onChange={(v) => update('dinnerStart', v)}
+              presets={DINNER_START_PRESETS}
+              hint={draft.dinnerOn ? '不计薪' : undefined}
+              disabled={!draft.dinnerOn}
+            />
+            <TimeField
+              label="晚休结束"
+              value={draft.dinnerEnd}
+              onChange={(v) => update('dinnerEnd', v)}
+              presets={DINNER_END_PRESETS}
+              disabled={!draft.dinnerOn}
+            />
+            {dinner.on && (dinner.invalid || dinner.outside) && (
+              <p className="formWarn">
+                {dinner.invalid
+                  ? '晚休起止时间一样，先按「没有晚休」算。'
+                  : '晚休有一段在上下班之外，只扣班内那一段。'}
+              </p>
+            )}
+          </div>
 
           <div className="formFoot">
             <button
@@ -183,7 +227,7 @@ export function SalaryPage({ config, onSave }: Props) {
             </button>
             <span className="formFoot__sum">
               折合 <b className="numeric">¥{fmtMoney(preview.daily, 0)}</b> / 天 · 净工时{' '}
-              {(tl.work / 60).toFixed(1)} h
+              {preview.hours.toFixed(1)} h
             </span>
           </div>
         </motion.section>
@@ -218,21 +262,55 @@ export function SalaryPage({ config, onSave }: Props) {
               <b className="numeric">¥{fmtMoney(preview.hourly, 2)}</b>
             </li>
             <li>
-              <span>净工时（已扣午休）</span>
+              <span>净工时（已扣休息）</span>
               <b className="numeric">{preview.hours.toFixed(1)} 小时</b>
             </li>
             <li>
-              <span>午休时长</span>
-              <b className="numeric">{preview.lunch.toFixed(0)} 分钟</b>
+              <span>午休</span>
+              <b className="numeric">{preview.lunch ? `${preview.lunch} 分钟` : '没有'}</b>
+            </li>
+            <li>
+              <span>晚休</span>
+              <b className="numeric">{preview.dinner ? `${preview.dinner} 分钟` : '没有'}</b>
             </li>
           </ul>
 
           <p className="receipt__formula">
             <SparkIcon width={13} height={13} />
-            每秒 = 月薪 ÷ {preview.payDays} 天 ÷（班次 − 午休）秒数
+            每秒 = 月薪 ÷ {preview.payDays} 天 ÷（班次 − 休息）秒数
           </p>
         </motion.aside>
       </div>
+    </div>
+  )
+}
+
+/** 一段休息的小标题 + 开关（没有这段休息的人直接关掉） */
+function BreakHead({
+  title,
+  note,
+  on,
+  onToggle,
+}: {
+  title: string
+  note: string
+  on: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div className="breakHead">
+      <span className="breakHead__title">{title}</span>
+      <span className={`breakHead__note${on ? '' : ' is-off'}`}>{note}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={`${on ? '关闭' : '打开'}${title}`}
+        className={`switch${on ? ' is-on' : ''}`}
+        onClick={onToggle}
+      >
+        <span className="switch__dot" />
+      </button>
     </div>
   )
 }

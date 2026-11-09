@@ -441,6 +441,7 @@ button {
 
 .segmented {
   display: inline-flex;
+  flex-wrap: wrap;
   padding: 4px;
   gap: 4px;
   border-radius: 16px;
@@ -496,6 +497,10 @@ button {
 
 .stage.is-lunch {
   background: linear-gradient(180deg, #eaf6f1 0%, #e9f3ff 58%, #f3f0ff 100%);
+}
+
+.stage.is-dinner {
+  background: linear-gradient(180deg, #f3f0ff 0%, #ffeef5 58%, #fff2e6 100%);
 }
 
 .stage {
@@ -1260,6 +1265,20 @@ button {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  transition: opacity 0.18s ease;
+}
+
+.timeField.is-off {
+  opacity: 0.45;
+}
+
+.timeField.is-off .input--btn {
+  cursor: default;
+  background: #f4f5f9;
+}
+
+.timeField.is-off .timeField__value {
+  color: var(--ink-3);
 }
 
 .input--btn {
@@ -1405,10 +1424,92 @@ button {
 }
 
 .formWarn {
-  margin: -6px 0 14px;
-  font-size: 11.5px;
-  color: #e08a2c;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 2px;
+  padding: 8px 11px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b96a12;
+  background: rgba(255, 190, 92, 0.16);
+  border: 1px solid rgba(245, 166, 35, 0.28);
   font-family: var(--font-note);
+}
+
+.formWarn::before {
+  content: '!';
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: #f5a623;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+  font-family: var(--font-display);
+}
+
+/* ---------- 午休 / 晚休 小标题 + 开关 ---------- */
+.breakHead {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 -2px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(27, 37, 89, 0.1);
+}
+
+.breakHead__title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.breakHead__note {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  font-family: var(--font-note);
+}
+
+.breakHead__note.is-off {
+  color: #b6bccf;
+}
+
+.switch {
+  margin-left: auto;
+  flex: none;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  border: none;
+  border-radius: 999px;
+  background: #dfe3ee;
+  transition: background 0.18s ease;
+}
+
+.switch.is-on {
+  background: linear-gradient(135deg, #4d84ff, #7aa2ff);
+}
+
+.switch__dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(27, 37, 89, 0.24);
+  transition: transform 0.18s ease;
+}
+
+.switch.is-on .switch__dot {
+  transform: translateX(18px);
 }
 
 /* ---------- 午休 / 沉浸按钮 ---------- */
@@ -2741,5 +2842,26 @@ textarea,
   .nav__icon {
     width: 24px;
     height: 24px;
+  }
+}
+
+/* ---------- 窄屏：预览切换器 6 个选项要放得下 ---------- */
+@media (max-width: 560px) {
+  .previewRow {
+    gap: 8px;
+  }
+
+  .previewRow__label {
+    display: none;
+  }
+
+  .segmented--sm {
+    padding: 3px;
+    gap: 3px;
+  }
+
+  .segmented--sm button {
+    padding: 6px 9px;
+    font-size: 11.5px;
   }
 }

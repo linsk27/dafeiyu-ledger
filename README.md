@@ -136,11 +136,13 @@ hover 才变蓝并铺一层浅底。地址默认 `https://github.com`，换成�
 
 ## 打包成 Android APK
 
-产物在 `release/dafeiyu-ledger-v1.4-debug.apk`（约 9 MB，versionCode 5 / versionName 1.4，debug 签名，可直接覆盖安装）。
+产物在 `release/dafeiyu-ledger-v1.5-debug.apk`（约 9 MB，versionCode 6 / versionName 1.5，debug 签名，可直接覆盖安装）。
 
 v1.1 修的三件事：启动白屏（内置启动画面）、首次进入的引导（空数据 → 去薪资管理）、状态栏遮挡（原生 inset + 深色图标）。
 
 v1.3 修的两件事：手机上切 tab 掉帧（去掉 `backdrop-filter` / `filter: blur`，窄屏不做页面转场）、薪资表单在窄屏溢出（时间面板右对齐 + 页脚回文档流）。
+
+v1.5：新增**晚休**（晚饭时间），午休/晚休各自带开关，没有的直接关掉；时间冲突的提示改成独立的橙色小胶囊 + 感叹号，不再被分隔虚线压住。
 
 v1.4 修的是顶栏本身：窄屏下两个 tab 原来是 `flex: 1` 但子项不肯收缩，「薪资管理」被挤出顶栏卡片外。现在两个 tab 等分可用宽度、允许收缩、文字超长省略；≤470px 时品牌只留鲸鱼图标，把宽度让给 tab。
 

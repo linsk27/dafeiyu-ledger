@@ -32,6 +32,12 @@ const FISH: Record<Phase, { src: string; alt: string; title: string; sub: string
     title: '午休中，先扒两口饭',
     sub: '午休不扣钱，也不进账，一会儿接着算',
   },
+  dinner: {
+    src: '/assets/fish-work.webp',
+    alt: '晚饭时间、还在打算盘的大肥鱼',
+    title: '晚休中，扒口饭再战',
+    sub: '吃点东西，晚班还长着呢',
+  },
   after: {
     src: '/assets/fish-rich.webp',
     alt: '抱着钱堆、眼里发光的大肥鱼',
@@ -110,9 +116,11 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
         ? `每秒 +¥${perSecond(config, now).toFixed(4)}`
         : phase === 'lunch'
           ? '午休计时暂停'
-          : phase === 'before'
-            ? '还没开始，先攒点力气'
-            : '今天到此为止，辛苦了'
+          : phase === 'dinner'
+            ? '晚休计时暂停'
+            : phase === 'before'
+              ? '还没开始，先攒点力气'
+              : '今天到此为止，辛苦了'
 
   return (
     <section className={`stage is-${phase}${variant === 'immersive' ? ' stage--immersive' : ''}`}>
@@ -174,11 +182,13 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
           <div className="stage__meterTop">
             <span className="stage__meterLabel">
               <ClockIcon width={16} height={16} />
-              {phase === 'working' || phase === 'lunch'
+              {phase === 'working'
                 ? `还剩 ${fmtDuration(left)}`
-                : phase === 'before'
-                  ? `${config.start} 开工`
-                  : `${config.end} 已收工`}
+                : phase === 'lunch' || phase === 'dinner'
+                  ? `${phase === 'lunch' ? '午休' : '晚休'}中 · 还剩 ${fmtDuration(left)}`
+                  : phase === 'before'
+                    ? `${config.start} 开工`
+                    : `${config.end} 已收工`}
             </span>
             <span className="stage__meterValue numeric">{Math.round(progress * 100)}%</span>
           </div>

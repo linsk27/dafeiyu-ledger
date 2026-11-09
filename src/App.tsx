@@ -9,7 +9,6 @@ import { loadConfig, saveConfig } from './lib/storage'
 import {
   DEFAULT_CONFIG,
   endOf,
-  minutesOf,
   phaseAt,
   startOf,
   timeline,
@@ -26,7 +25,9 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
   const config = stored ?? DEFAULT_CONFIG
   const [preview, setPreview] = useState<'auto' | Phase>(() => {
     const p = new URLSearchParams(window.location.search).get('phase')
-    return p === 'before' || p === 'working' || p === 'lunch' || p === 'after' ? p : 'auto'
+    return p === 'before' || p === 'working' || p === 'lunch' || p === 'dinner' || p === 'after'
+      ? p
+      : 'auto'
   })
   const [immersive, setImmersive] = useState(
     () => new URLSearchParams(window.location.search).get('immersive') === '1',
@@ -59,17 +60,25 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
     const today = new Date(base)
     const s = startOf(today, config).getTime()
     const e = endOf(today, config).getTime()
-    const { ls, le } = timeline(config)
-    const lunchStart = s + Math.max(0, ls - minutesOf(config.start)) * 60_000
-    const lunchEnd = s + Math.max(0, le - minutesOf(config.start)) * 60_000
+    const tl = timeline(config)
+    // 休息区间已经是「一天内的分钟数」，换算成绝对时间点
+    const toAbs = (min: number) => s + Math.max(0, min - tl.s) * 60_000
+    const lunchMid = tl.lunch ? (toAbs(tl.lunch.from) + toAbs(tl.lunch.to)) / 2 : null
+    const dinnerMid = tl.dinner ? (toAbs(tl.dinner.from) + toAbs(tl.dinner.to)) / 2 : null
+
     let target: number
     if (preview === 'before') target = s - 2 * 3600_000
     else if (preview === 'after') target = e + 3600_000
-    else if (preview === 'lunch') target = (lunchStart + lunchEnd) / 2
+    else if (preview === 'lunch' && lunchMid !== null) target = lunchMid
+    else if (preview === 'dinner' && dinnerMid !== null) target = dinnerMid
     else {
-      // 上班中：取早上开工后 40% 的位置，撞上午休就挪到午休结束前 15 分钟
-      const guess = s + Math.max(60_000, (e - s) * 0.4)
-      target = guess >= lunchStart && guess < lunchEnd ? lunchEnd + 15 * 60_000 : guess
+      // 上班中：取开工后 40% 的位置；正好撞上休息就往后挪出休息区
+      let guess = s + Math.max(60_000, (e - s) * 0.4)
+      const inside = [tl.lunch, tl.dinner].find(
+        (sp) => sp && guess >= toAbs(sp.from) && guess < toAbs(sp.to),
+      )
+      if (inside) guess = toAbs(inside.to) + 15 * 60_000
+      target = guess
     }
     return target - base
   }, [preview, config])

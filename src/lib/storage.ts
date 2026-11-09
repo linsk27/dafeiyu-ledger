@@ -1,4 +1,4 @@
-import { clampConfig, DEFAULT_CONFIG, type SalaryConfig } from './salary'
+import { clampConfig, DEFAULT_CONFIG, minutesOf, type SalaryConfig } from './salary'
 
 const KEY = 'dafeiyu-ledger:v2'
 const LEGACY = 'dafeiyu-ledger:v1'
@@ -28,12 +28,23 @@ function migrate(): SalaryConfig | null {
   }
 }
 
-/** 没存过（也没有 v1 可迁移）时返回 null —— 用来区分「首次进入」 */
+/**
+ * 没存过（也没有 v1 可迁移）时返回 null —— 用来区分「首次进入」。
+ *
+ * 老版本只有午休、没有开关：迁移时如果起止相同（当时表示「没有午休」），
+ * 就把午休开关关掉，而不是弹一条「时间顺序反了」的红字。
+ */
 export function loadConfig(): SalaryConfig | null {
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) {
-      return clampConfig({ ...DEFAULT_CONFIG, ...(JSON.parse(raw) as Partial<SalaryConfig>) })
+      const saved = JSON.parse(raw) as Partial<SalaryConfig>
+      const merged = { ...DEFAULT_CONFIG, ...saved }
+      if (!('lunchOn' in saved)) {
+        merged.lunchOn = minutesOf(merged.lunchEnd) !== minutesOf(merged.lunchStart)
+      }
+      if (!('dinnerOn' in saved)) merged.dinnerOn = false
+      return clampConfig(merged)
     }
     const migrated = migrate()
     if (migrated) return migrated

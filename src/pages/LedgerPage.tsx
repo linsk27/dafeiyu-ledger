@@ -17,6 +17,7 @@ const PHASE_TEXT: Record<Phase, string> = {
   before: '上班前',
   working: '上班中',
   lunch: '午休中',
+  dinner: '晚休中',
   after: '已下班',
 }
 
@@ -24,6 +25,7 @@ const PREVIEWS: { id: Phase; label: string }[] = [
   { id: 'before', label: '上班前' },
   { id: 'working', label: '上班中' },
   { id: 'lunch', label: '午休' },
+  { id: 'dinner', label: '晚休' },
   { id: 'after', label: '下班后' },
 ]
 
@@ -118,7 +120,7 @@ export function LedgerPage({
         <StatCard
           label="今日已赚"
           value={`¥${fmtMoney(earned)}`}
-          note="保底 4 位小数，午休不计"
+          note="保底 4 位小数，休息不计"
           tone="green"
           delay={0}
         />

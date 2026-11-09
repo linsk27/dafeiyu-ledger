@@ -12,9 +12,11 @@ interface Props {
   onChange: (v: string) => void
   presets?: string[]
   hint?: string
+  /** 关闭状态：变灰、点不开 */
+  disabled?: boolean
 }
 
-export function TimeField({ label, value, onChange, presets, hint }: Props) {
+export function TimeField({ label, value, onChange, presets, hint, disabled }: Props) {
   const [open, setOpen] = useState(false)
   const [up, setUp] = useState(false)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -41,6 +43,7 @@ export function TimeField({ label, value, onChange, presets, hint }: Props) {
 
   // 展开方向在点击时就算好，避免先向下渲染一帧再翻上去（那一下就是“抽搐”）
   const toggle = () => {
+    if (disabled) return
     if (open) {
       setOpen(false)
       return
@@ -64,11 +67,12 @@ export function TimeField({ label, value, onChange, presets, hint }: Props) {
   }, [open, hh])
 
   return (
-    <div className="timeField" ref={boxRef}>
+    <div className={`timeField${disabled ? ' is-off' : ''}`} ref={boxRef}>
       <span className="field__label">{label}</span>
       <button
         ref={btnRef}
         type="button"
+        disabled={disabled}
         className={`input input--btn${open ? ' is-open' : ''}`}
         onClick={toggle}
       >

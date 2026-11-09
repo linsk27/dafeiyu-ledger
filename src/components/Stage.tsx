@@ -63,6 +63,20 @@ const POKES: Partial<Record<Phase, { src: string; alt: string; title: string; su
     sub: '……骂完了，捡起来继续算',
     note: '生气中，钱还是照涨',
   },
+  lunch: {
+    src: '/assets/fish-poke-sleep.webp',
+    alt: '被戳醒、气鼓鼓趴在枕头上的大肥鱼',
+    title: '谁！谁戳我！',
+    sub: '……午休就一小时，别闹',
+    note: '被戳醒了，午休继续',
+  },
+  dinner: {
+    src: '/assets/fish-poke-sleep.webp',
+    alt: '被戳醒、气鼓鼓趴在枕头上的大肥鱼',
+    title: '醒了醒了，别戳了',
+    sub: '……离下班还早着呢',
+    note: '被戳醒了，晚休继续',
+  },
   after: {
     src: '/assets/fish-poke-after.webp',
     alt: '举着钞票撒钱、眼睛发光的大肥鱼',

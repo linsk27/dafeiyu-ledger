@@ -304,3 +304,35 @@ export function clampConfig(c: SalaryConfig): SalaryConfig {
       : null,
   }
 }
+
+/**
+ * 休息开着却落在班次外（或起止相同）时，把它挪进班次里。
+ * 用来兜住老数据：默认晚休 18:00–18:30 撞上 18:00 下班，开着也永远"没生效"。
+ */
+export function repairBreaks(c: SalaryConfig): SalaryConfig {
+  const out = { ...c }
+  const fit = (id: BreakId) => {
+    const onKey = id === 'lunch' ? 'lunchOn' : 'dinnerOn'
+    if (!out[onKey]) return
+    if (breakInfo(out, id).span) return
+    const { s, e } = timeline(out)
+    const len = id === 'lunch' ? 60 : 40
+    const from = id === 'lunch' ? s + 4 * 60 : Math.max(s + len, e - len - 10)
+    const to = Math.min(e, from + len)
+    if (to - from < 10) return
+    const hm = (min: number) => {
+      const v = ((Math.round(min) % 1440) + 1440) % 1440
+      return `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`
+    }
+    if (id === 'lunch') {
+      out.lunchStart = hm(from)
+      out.lunchEnd = hm(to)
+    } else {
+      out.dinnerStart = hm(from)
+      out.dinnerEnd = hm(to)
+    }
+  }
+  fit('lunch')
+  fit('dinner')
+  return out
+}

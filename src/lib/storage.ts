@@ -3,6 +3,7 @@ import {
   DEFAULT_CONFIG,
   minutesOf,
   monthWorkdays,
+  repairBreaks,
   type SalaryConfig,
 } from './salary'
 
@@ -60,7 +61,16 @@ export function loadConfig(): SalaryConfig | null {
           merged.workDays = monthWorkdays(now.getFullYear(), now.getMonth())
         }
       }
-      return clampConfig(merged)
+      const fixed = repairBreaks(clampConfig(merged))
+      // 修过的（休息从越界位置挪进班次）顺手写回去，别每次启动都重算
+      if (JSON.stringify(fixed) !== JSON.stringify(clampConfig(merged))) {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(fixed))
+        } catch {
+          /* 存不进去也不影响这次使用 */
+        }
+      }
+      return fixed
     }
     const migrated = migrate()
     if (migrated) return migrated

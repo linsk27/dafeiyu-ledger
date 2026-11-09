@@ -15,7 +15,9 @@
 
 <p>
   <a href="https://github.com/linsk27/dafeiyu-ledger/releases/latest"><b>📱 下载 Android APK</b></a>
-  &nbsp;·&nbsp; 网页版 <code>pnpm install && pnpm dev</code>
+  &nbsp;·&nbsp;
+  <a href="https://linsk27.github.io/dafeiyu-ledger/"><b>🌐 在线打开（手机也能用）</b></a>
+  &nbsp;·&nbsp; 本地 <code>pnpm install && pnpm dev</code>
 </p>
 
 </div>
@@ -149,6 +151,23 @@ cd android && ./gradlew assembleDebug
 ```
 
 需要 JDK 21（Capacitor 7 的编译目标）、Android SDK 35、build-tools 35。
+
+## 在线版（GitHub Pages）
+
+<https://linsk27.github.io/dafeiyu-ledger/>
+
+Hosting 走的是 `gh-pages` 分支（不是 Actions，理由见下），发布步骤：
+
+```bash
+pnpm build
+# 把 dist/ 里的东西推到一个孤儿分支
+cd dist && git init -q -b gh-pages && touch .nojekyll
+git add -A && git commit -m "deploy" && git push -f <remote> gh-pages:gh-pages
+```
+
+为什么不用 Actions 自动部署：这台机器上的 Personal Access Token 没有 `workflow` 权限
+（`refusing to allow a Personal Access Token to create or update workflow ... without 'workflow' scope`），
+推不了 `.github/workflows/*.yml`。给 token 勾上 `workflow` 之后，把 `pages.yml` 加回去就能每次 push 自动部署。
 
 ## iPhone
 

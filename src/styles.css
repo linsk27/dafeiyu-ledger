@@ -693,20 +693,14 @@ button {
   background: rgba(255, 255, 255, 0.14);
 }
 
-.stage--night /* 休息的那张是横构图（趴在枕头上），给宽一点，也别再压一个落地阴影 */
-.stage.is-lunch .stage__fish,
-.stage.is-dinner .stage__fish {
-  height: clamp(230px, 36vh, 380px);
-  max-width: min(92%, 560px);
+.stage--night .stage__fish {
+  filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.5));
 }
 
+/* 休息时贴地阴影不要（那张是趴着的，原本那个椭圆是给站姿的） */
 .stage.is-lunch .stage__floor,
 .stage.is-dinner .stage__floor {
   display: none;
-}
-
-.stage__fish {
-  filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.5));
 }
 
 .stage--night .stage__floor {
@@ -774,6 +768,12 @@ button {
   animation: fishIn 0.3s ease-out, bob 4.6s ease-in-out infinite;
   position: relative;
   z-index: 2;
+}
+
+/* 睡姿那张是横构图，只放宽宽度上限；高度与其它时段完全一致，卡片才不会忽高忽低 */
+.stage.is-lunch .stage__fish,
+.stage.is-dinner .stage__fish {
+  max-width: min(92%, 560px);
   /* 两张图永远互斥：不做透明度过渡，切图硬切 + 各自入场动效 */
   transition: none;
 }

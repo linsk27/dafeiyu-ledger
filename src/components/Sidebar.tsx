@@ -56,7 +56,7 @@ export function Sidebar({ tab, onChange }: Props) {
       </nav>
 
       <div className="sidebar__foot">
-        <img src="/assets/fish-poor.webp" alt="" className="sidebar__fish" />
+        <img src={`${import.meta.env.BASE_URL}assets/fish-poor.webp`} alt="" className="sidebar__fish" />
         <p>每一秒都在进账，<br />别忘了摸摸鱼。</p>
       </div>
     </aside>

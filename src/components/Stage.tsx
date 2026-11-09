@@ -16,31 +16,31 @@ import {
 
 const FISH: Record<Phase, { src: string; alt: string; title: string; sub: string }> = {
   before: {
-    src: '/assets/fish-poor.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-poor.webp`,
     alt: '还没上班、抱着空钱包的大肥鱼',
     title: '钱包空空，还没到点',
     sub: '上班时间一到，这里就开始跳数字啦',
   },
   working: {
-    src: '/assets/fish-work.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-work.webp`,
     alt: '戴着牛头帽、打着算盘的大肥鱼',
     title: '牛马大肥鱼，正在搬砖',
     sub: '每一秒都在为你赚一点点',
   },
   lunch: {
-    src: '/assets/fish-sleep.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-sleep.webp`,
     alt: '趴在枕头上睡着的大肥鱼',
     title: '午休中，趴着眯一会儿',
     sub: '午休不扣钱，也不进账，一会儿接着算',
   },
   dinner: {
-    src: '/assets/fish-sleep.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-sleep.webp`,
     alt: '趴在枕头上睡着的大肥鱼',
     title: '晚休中，先趴一会儿',
     sub: '吃点东西，晚班还长着呢',
   },
   after: {
-    src: '/assets/fish-rich.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-rich.webp`,
     alt: '抱着钱堆、眼里发光的大肥鱼',
     title: '下班啦，今天赚麻了',
     sub: '今天的工资已经全部到账',
@@ -50,35 +50,35 @@ const FISH: Record<Phase, { src: string; alt: string; title: string; sub: string
 /** 点击互动图：每个时段各有一张「反应」，午休没有 */
 const POKES: Partial<Record<Phase, { src: string; alt: string; title: string; sub: string; note: string }>> = {
   before: {
-    src: '/assets/fish-poke-before.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-poke-before.webp`,
     alt: '气得把钱包倒过来抖的大肥鱼',
     title: '钱包：真的挤不出来了',
     sub: '……抖了三分钟，掉出两个钢镚',
     note: '摇钱包中，一分也没有',
   },
   working: {
-    src: '/assets/fish-poke-work.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-poke-work.webp`,
     alt: '把算盘摔出去、气鼓鼓的大肥鱼',
     title: '算盘摔了！这破班谁爱上谁上',
     sub: '……骂完了，捡起来继续算',
     note: '生气中，钱还是照涨',
   },
   lunch: {
-    src: '/assets/fish-poke-sleep.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-poke-sleep.webp`,
     alt: '被戳醒、气鼓鼓趴在枕头上的大肥鱼',
     title: '谁！谁戳我！',
     sub: '……午休就一小时，别闹',
     note: '被戳醒了，午休继续',
   },
   dinner: {
-    src: '/assets/fish-poke-sleep.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-poke-sleep.webp`,
     alt: '被戳醒、气鼓鼓趴在枕头上的大肥鱼',
     title: '醒了醒了，别戳了',
     sub: '……离下班还早着呢',
     note: '被戳醒了，晚休继续',
   },
   after: {
-    src: '/assets/fish-poke-after.webp',
+    src: `${import.meta.env.BASE_URL}assets/fish-poke-after.webp`,
     alt: '举着钞票撒钱、眼睛发光的大肥鱼',
     title: '发工资啦！钱给我撒起来',
     sub: '反正都是今天一秒一秒赚的',
@@ -119,9 +119,9 @@ function isNightScene(phase: Phase, config: SalaryConfig) {
 function bgFor(phase: Phase, day: boolean) {
   // 休息躺床，干活在工位；都分白天/夜里两版
   if (phase === 'lunch' || phase === 'dinner') {
-    return day ? '/assets/bg-rest-day.jpg' : '/assets/bg-rest-night.jpg'
+    return day ? 'bg-rest-day.jpg' : 'bg-rest-night.jpg'
   }
-  return day ? '/assets/bg-day.jpg' : '/assets/bg-night.jpg'
+  return day ? 'bg-day.jpg' : 'bg-night.jpg'
 }
 
 export function Stage({ config, now, phase, variant = 'card' }: Props) {
@@ -177,7 +177,7 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
       className={`stage is-${phase} stage--photo${day ? '' : ' stage--night'}${
         variant === 'immersive' ? ' stage--immersive' : ''
       }`}
-      style={{ ['--photo' as string]: `url(${photo})` } as React.CSSProperties}
+      style={{ ['--photo' as string]: `url(./${photo})` } as React.CSSProperties}
     >
       <div className="stage__meta" aria-hidden>
         <span>DAFEIYU LEDGER</span>

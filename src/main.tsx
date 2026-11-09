@@ -27,6 +27,6 @@ if (boot) {
 // 生产构建下把字体和角色图放进 Cache Storage，二次访问不再回源
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => undefined)
   })
 }

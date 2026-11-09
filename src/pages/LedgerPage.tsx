@@ -210,7 +210,7 @@ function Onboarding({ onGoSalary }: { onGoSalary: () => void }) {
       </header>
 
       <section className="onboard">
-        <img className="onboard__fish" src="/assets/fish-setup.webp" alt="" />
+        <img className="onboard__fish" src={`${import.meta.env.BASE_URL}assets/fish-setup.webp`} alt="" />
         <h2 className="onboard__title">这里还空着呢</h2>
         <p className="onboard__text">
           去「薪资管理」填一下月薪和上下班时间，

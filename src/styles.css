@@ -2936,7 +2936,7 @@ html,
 body,
 body * {
   /* 32px = 系统指针同尺寸；白描边保证深色底上也能看清 */
-  cursor: url('/assets/cursor-fish.png') 16 16, auto !important;
+  cursor: url('./cursor-fish.png') 16 16, auto !important;
 }
 
 input,
@@ -2955,13 +2955,13 @@ button,
 .timePop__hour,
 .timePop__min,
 .timePop__presets button {
-  cursor: url('/assets/cursor-love.png') 16 16, pointer !important;
+  cursor: url('./cursor-love.png') 16 16, pointer !important;
 }
 
 .btn--primary,
 .btn--immersive,
 .stage__fishBtn.is-poke {
-  cursor: url('/assets/cursor-work.png') 16 16, pointer !important;
+  cursor: url('./cursor-work.png') 16 16, pointer !important;
 }
 /* ---------- 图片不可选中 / 不可拖动，但点击照旧 ---------- */
 * {

@@ -1,10 +1,10 @@
 <div align="center">
 
-# 大肥鱼账本 · Dafeiyu Ledger
+<h1>大肥鱼账本 · Dafeiyu Ledger</h1>
 
-**上班的时候，看着钱一秒一秒长出来。**
+<p><b>上班的时候，看着钱一秒一秒长出来。</b></p>
 
-一个可爱风的「牛马激励器」：大肥鱼戴着牛头帽打算盘，头顶的绿色数字跟着秒针往上跳。
+<p>一个可爱风的「牛马激励器」：大肥鱼戴着牛头帽打算盘，头顶的绿色数字跟着秒针往上跳。</p>
 
 <p>
   <a href="https://github.com/linsk27/dafeiyu-ledger/releases/latest"><img alt="下载 APK" src="https://img.shields.io/github/v/release/linsk27/dafeiyu-ledger?label=APK&color=4b7bf5"></a>
@@ -13,7 +13,10 @@
   <img alt="React" src="https://img.shields.io/badge/React-19-149eca">
 </p>
 
-**[📱 下载 Android APK](https://github.com/linsk27/dafeiyu-ledger/releases/latest)** · 网页版 `pnpm install && pnpm dev`
+<p>
+  <a href="https://github.com/linsk27/dafeiyu-ledger/releases/latest"><b>📱 下载 Android APK</b></a>
+  &nbsp;·&nbsp; 网页版 <code>pnpm install && pnpm dev</code>
+</p>
 
 </div>
 

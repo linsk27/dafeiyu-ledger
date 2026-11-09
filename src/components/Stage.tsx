@@ -6,6 +6,7 @@ import {
   dailySalary,
   earnedAt,
   fmtDuration,
+  minutesOf,
   perSecond,
   progressOf,
   remainingSeconds,
@@ -81,9 +82,19 @@ interface Props {
 }
 
 /** 白天 6:00–18:00 用白天那张，其余用夜里那张 */
-function isDaylight(d: Date) {
-  const h = d.getHours()
+function isDayHour(h: number) {
   return h >= 6 && h < 18
+}
+
+/**
+ * 判断「这一屏该不该是夜里」用的钟点：
+ * - 午休/晚休看休息本身几点开始（晚休 18:00 就该是夜里那张床，跟现在几点无关）
+ * - 其余时段看当下的真实钟点
+ */
+function hourFor(phase: Phase, config: SalaryConfig) {
+  if (phase === 'lunch') return Math.floor(minutesOf(config.lunchStart) / 60) % 24
+  if (phase === 'dinner') return Math.floor(minutesOf(config.dinnerStart) / 60) % 24
+  return new Date().getHours()
 }
 
 /**
@@ -140,7 +151,7 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
               ? '还没开始，先攒点力气'
               : '今天到此为止，辛苦了'
 
-  const day = isDaylight(new Date())
+  const day = isDayHour(hourFor(phase, config))
   const photo = bgFor(phase, day)
   const today = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(
     now.getDate(),

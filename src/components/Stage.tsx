@@ -28,15 +28,15 @@ const FISH: Record<Phase, { src: string; alt: string; title: string; sub: string
     sub: '每一秒都在为你赚一点点',
   },
   lunch: {
-    src: '/assets/fish-work.webp',
-    alt: '午休打盹的大肥鱼',
-    title: '午休中，先扒两口饭',
+    src: '/assets/fish-sleep.webp',
+    alt: '趴在枕头上睡着的大肥鱼',
+    title: '午休中，趴着眯一会儿',
     sub: '午休不扣钱，也不进账，一会儿接着算',
   },
   dinner: {
-    src: '/assets/fish-work.webp',
-    alt: '晚饭时间、还在打算盘的大肥鱼',
-    title: '晚休中，扒口饭再战',
+    src: '/assets/fish-sleep.webp',
+    alt: '趴在枕头上睡着的大肥鱼',
+    title: '晚休中，先趴一会儿',
     sub: '吃点东西，晚班还长着呢',
   },
   after: {

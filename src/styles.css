@@ -693,7 +693,19 @@ button {
   background: rgba(255, 255, 255, 0.14);
 }
 
-.stage--night .stage__fish {
+.stage--night /* 休息的那张是横构图（趴在枕头上），给宽一点，也别再压一个落地阴影 */
+.stage.is-lunch .stage__fish,
+.stage.is-dinner .stage__fish {
+  height: clamp(230px, 36vh, 380px);
+  max-width: min(92%, 560px);
+}
+
+.stage.is-lunch .stage__floor,
+.stage.is-dinner .stage__floor {
+  display: none;
+}
+
+.stage__fish {
   filter: drop-shadow(0 26px 30px rgba(0, 0, 0, 0.5));
 }
 

@@ -91,8 +91,10 @@ function isDaylight(d: Date) {
  * 注意不能用 now —— 预览模式会把 now 平移进某个时段，天色会被一起改掉。
  */
 function bgFor(phase: Phase, day: boolean) {
-  // 休息时段将来换成「大床」图，图没到位前先退回工位
-  void phase
+  // 休息躺床，干活在工位；都分白天/夜里两版
+  if (phase === 'lunch' || phase === 'dinner') {
+    return day ? '/assets/bg-rest-day.jpg' : '/assets/bg-rest-night.jpg'
+  }
   return day ? '/assets/bg-day.jpg' : '/assets/bg-night.jpg'
 }
 

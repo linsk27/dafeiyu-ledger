@@ -598,10 +598,10 @@ button {
   content: '';
   position: absolute;
   inset: 0 0 auto;
-  height: 56%;
+  height: 52%;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 253, 247, 0.72), rgba(255, 253, 247, 0));
+  background: linear-gradient(180deg, rgba(255, 253, 247, 0.44), rgba(255, 253, 247, 0));
 }
 
 .stage.stage--photo.stage--night::before {

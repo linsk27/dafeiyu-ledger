@@ -4,12 +4,16 @@ import './styles.css'
 import App from './App'
 
 const boot = document.getElementById('boot')
+// index.html 里给搜索引擎准备的正文，React 接管后就不需要了
+const seo = document.getElementById('seo')
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
 )
+
+seo?.remove()
 
 /**
  * 启动占位是写在 index.html 里的静态 DOM，React 挂载后淡出。

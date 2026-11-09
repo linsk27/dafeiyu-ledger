@@ -30,7 +30,54 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
     />
     <meta name="theme-color" content="#FDF6F4" />
-    <title>大肥鱼账本</title>
+
+    <title>大肥鱼账本 · 上班时看着钱一秒一秒长出来</title>
+    <meta
+      name="description"
+      content="可爱风的「牛马激励器」：填好月薪和上下班时间，大肥鱼就戴着牛头帽坐在工位打算盘，头顶的绿色数字每秒跳一次。支持午休晚休、昼夜背景、沉浸模式，也能装到手机主屏当 App 用。"
+    />
+    <meta name="keywords" content="大肥鱼账本,每秒进账,工资计算,摸鱼,牛马,上班,打卡,账本,大肥鱼" />
+    <meta name="author" content="linsk27" />
+    <link rel="canonical" href="https://linsk27.github.io/dafeiyu-ledger/" />
+
+    <!-- 分享出去时有图有标题（微信 / QQ / X / Discord 都认这套） -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="大肥鱼账本" />
+    <meta property="og:title" content="大肥鱼账本 · 上班时看着钱一秒一秒长出来" />
+    <meta
+      property="og:description"
+      content="填月薪和上下班时间，大肥鱼帮你把工资拆成每秒一次的心跳。"
+    />
+    <meta property="og:url" content="https://linsk27.github.io/dafeiyu-ledger/" />
+    <meta property="og:image" content="https://linsk27.github.io/dafeiyu-ledger/cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="大肥鱼账本：戴着牛头帽打算盘的大肥鱼，头顶是每秒跳动的收入数字" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="大肥鱼账本 · 一秒一秒看着钱长出来" />
+    <meta name="twitter:description" content="可爱风的牛马激励器，填好工资就能看着收入每秒跳动。" />
+    <meta name="twitter:image" content="https://linsk27.github.io/dafeiyu-ledger/cover.jpg" />
+
+    <!-- 结构化数据：搜索引擎知道这是个什么应用 -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "大肥鱼账本",
+        "alternateName": "Dafeiyu Ledger",
+        "url": "https://linsk27.github.io/dafeiyu-ledger/",
+        "description": "可爱风的牛马激励器：填好月薪与上下班时间，把日薪拆成每秒一次的心跳，配合大肥鱼的昼夜工位场景。",
+        "image": "https://linsk27.github.io/dafeiyu-ledger/cover.jpg",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Android, iOS, Web",
+        "inLanguage": "zh-CN",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+        "license": "https://github.com/linsk27/dafeiyu-ledger/blob/main/LICENSE",
+        "sameAs": ["https://github.com/linsk27/dafeiyu-ledger"]
+      }
+    </script>
 
     <!--
       字体在首屏渲染前取回：URL 必须和 styles.css 里的 @font-face 完全一致（含 ?v=1），
@@ -147,6 +194,30 @@
           animation: none;
         }
       }
+
+      /* 极简正文排版：JS 没跑起来时也不至于是一团裸文本 */
+      #seo {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 48px 22px 96px;
+        font: 400 15px/1.85 -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        color: #3c4761;
+      }
+      #seo h1 {
+        margin: 0 0 16px;
+        font-size: 24px;
+        line-height: 1.45;
+      }
+      #seo ul {
+        margin: 14px 0;
+        padding-left: 20px;
+      }
+      #seo li {
+        margin: 6px 0;
+      }
+      #seo a {
+        color: #3f6fe4;
+      }
     </style>
   </head>
   <body>
@@ -154,6 +225,30 @@
       <img class="boot__fish" src="./assets/loading-fish.webp" alt="" width="483" height="620" />
       <p class="boot__text">大肥鱼正抱着算盘跑过来…</p>
       <span class="boot__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    </div>
+
+    <!--
+      给搜索引擎和不跑 JS 的抓取器看的正文。
+      React 挂载后由 main.tsx 移除；它被 #boot 盖住，用户看不到闪动。
+    -->
+    <div id="seo">
+      <h1>大肥鱼账本 · 上班时看着钱一秒一秒长出来</h1>
+      <p>
+        一个可爱风的「牛马激励器」。填好月薪、上下班时间和午休，大肥鱼就戴着牛头帽坐在工位上打算盘，
+        头顶的绿色数字每秒钟往上跳一次——那就是你今天到此刻为止赚到的钱。
+      </p>
+      <ul>
+        <li>数字精确到 4 位小数，每跳一格就飘出一枚 +0.0090 的小药丸</li>
+        <li>上班前抱空钱包、上班中摔算盘、下班后躺在钱堆里发光，五个状态各有各的角色图</li>
+        <li>白天是洒满阳光的工位，晚上换成台灯和城市灯火；休息时段还有一张床</li>
+        <li>点一下角色会生气、会撒钱；沉浸模式全屏只剩数字和它</li>
+        <li>可装到手机主屏当 App：Android 有安装包，iPhone 用 Safari 添加到主屏幕</li>
+      </ul>
+      <p>
+        在线打开：<a href="https://linsk27.github.io/dafeiyu-ledger/">https://linsk27.github.io/dafeiyu-ledger/</a>
+        · Android 安装包：<a href="https://github.com/linsk27/dafeiyu-ledger/releases/latest">GitHub Releases</a>
+        · 源码：<a href="https://github.com/linsk27/dafeiyu-ledger">linsk27/dafeiyu-ledger</a>
+      </p>
     </div>
 
     <div id="root"></div>

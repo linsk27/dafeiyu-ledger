@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://linsk27.github.io/dafeiyu-ledger/sitemap.xml

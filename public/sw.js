@@ -1,18 +1,29 @@
-/* 大肥鱼账本 · 静态资源缓存（只在生产构建注册） */
-const CACHE = 'dafeiyu-assets-v1'
+/* 大肥鱼账本 · Service Worker（只在生产构建注册）
+ *
+ * 目标：从主屏打开时即便断网也能进得去。
+ * - 导航请求：network-first，失败回落到缓存的 index.html
+ * - 同源静态资源（字体 / 脚本 / 样式 / 图片）：stale-while-revalidate
+ * 路径一律用相对写法：站点可能挂在 /dafeiyu-ledger/ 这样的子路径下。
+ */
+const CACHE = 'dafeiyu-v2'
 
 const PRECACHE = [
-  '/fonts/zcool-kuaile-cn.woff2?v=1',
-  '/fonts/baloo-2-500.woff2?v=1',
-  '/fonts/baloo-2-600.woff2?v=1',
-  '/fonts/baloo-2-700.woff2?v=1',
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './icons/apple-touch-icon.png',
+  './fonts/zcool-kuaile-cn.woff2?v=1',
+  './fonts/baloo-2-500.woff2?v=1',
+  './fonts/baloo-2-600.woff2?v=1',
+  './fonts/baloo-2-700.woff2?v=1',
 ]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(PRECACHE).catch(() => undefined))
+      // 单个资源失败不该让整个安装挂掉
+      .then((cache) => Promise.all(PRECACHE.map((url) => cache.add(url).catch(() => undefined))))
       .then(() => self.skipWaiting()),
   )
 })
@@ -26,6 +37,12 @@ self.addEventListener('activate', (event) => {
   )
 })
 
+const putInCache = (req, resp) => {
+  if (!resp || !resp.ok || resp.type === 'opaque') return
+  const copy = resp.clone()
+  caches.open(CACHE).then((cache) => cache.put(req, copy))
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request
   if (req.method !== 'GET') return
@@ -33,20 +50,53 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url)
   if (url.origin !== self.location.origin) return
 
-  const isFont = req.destination === 'font' || url.pathname.startsWith('/fonts/')
-  const isArt = url.pathname.startsWith('/assets/fish-') || url.pathname.includes('cursor-')
-  if (!isFont && !isArt) return
+  // 页面导航：先要新的，断网时用缓存里的壳
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((resp) => {
+          putInCache(req, resp)
+          return resp
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE)
+          return (
+            (await cache.match(req)) ||
+            (await cache.match('./index.html')) ||
+            (await cache.match('./')) ||
+            new Response('离线了，先连一次网再打开吧', {
+              status: 503,
+              headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+            })
+          )
+        }),
+    )
+    return
+  }
+
+  // 静态资源：先给缓存的，同时后台更新
+  const isStatic =
+    req.destination === 'font' ||
+    req.destination === 'script' ||
+    req.destination === 'style' ||
+    req.destination === 'image' ||
+    url.pathname.includes('/fonts/') ||
+    url.pathname.includes('/assets/') ||
+    url.pathname.includes('/icons/') ||
+    url.pathname.includes('/splash/') ||
+    url.pathname.endsWith('manifest.webmanifest')
+
+  if (!isStatic) return
 
   event.respondWith(
     caches.match(req).then((hit) => {
-      if (hit) return hit
-      return fetch(req).then((resp) => {
-        if (resp.ok) {
-          const copy = resp.clone()
-          caches.open(CACHE).then((cache) => cache.put(req, copy))
-        }
-        return resp
-      })
+      const network = fetch(req)
+        .then((resp) => {
+          putInCache(req, resp)
+          return resp
+        })
+        .catch(() => hit)
+      return hit || network
     }),
   )
 })

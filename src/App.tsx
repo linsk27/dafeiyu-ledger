@@ -54,8 +54,8 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
   }, [toast])
 
   /** 预览时把「现在」平移到对应时段；偏移量只算一次，之后跟随真实时间推进 */
-  const offsetMs = useMemo(() => {
-    if (preview === 'auto') return 0
+  const { offsetMs, freezeAt } = useMemo(() => {
+    if (preview === 'auto') return { offsetMs: 0, freezeAt: null }
     const base = Date.now()
     const today = new Date(base)
     const s = startOf(today, config).getTime()
@@ -80,10 +80,16 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
       if (inside) guess = toAbs(inside.to) + 15 * 60_000
       target = guess
     }
-    return target - base
+    // 休息时段「钉死」在休息中点：否则真实时间往前走 20 分钟后
+    // 预览会滑出休息区，数字又开始跳，看着像「休息还在计费」
+    const pinned = preview === 'lunch' || preview === 'dinner'
+    return { offsetMs: target - base, freezeAt: pinned ? target : null }
   }, [preview, config])
 
-  const viewNow = useMemo(() => new Date(now.getTime() + offsetMs), [now, offsetMs])
+  const viewNow = useMemo(
+    () => (freezeAt === null ? new Date(now.getTime() + offsetMs) : new Date(freezeAt)),
+    [now, offsetMs, freezeAt],
+  )
 
   const phase: Phase = phaseAt(viewNow, config)
 

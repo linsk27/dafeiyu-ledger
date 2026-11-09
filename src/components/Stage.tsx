@@ -80,6 +80,22 @@ interface Props {
   variant?: 'card' | 'immersive'
 }
 
+/** 白天 6:00–18:00 用白天那张，其余用夜里那张 */
+function isDaylight(d: Date) {
+  const h = d.getHours()
+  return h >= 6 && h < 18
+}
+
+/**
+ * 舞台底图：按「真实钟点」的天色挑白天/夜里那张。
+ * 注意不能用 now —— 预览模式会把 now 平移进某个时段，天色会被一起改掉。
+ */
+function bgFor(phase: Phase, day: boolean) {
+  // 休息时段将来换成「大床」图，图没到位前先退回工位
+  void phase
+  return day ? '/assets/bg-day.jpg' : '/assets/bg-night.jpg'
+}
+
 export function Stage({ config, now, phase, variant = 'card' }: Props) {
   const [poking, setPoking] = useState(false)
   const timer = useRef<number | undefined>(undefined)
@@ -122,11 +138,29 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
               ? '还没开始，先攒点力气'
               : '今天到此为止，辛苦了'
 
+  const day = isDaylight(new Date())
+  const photo = bgFor(phase, day)
+  const today = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(
+    now.getDate(),
+  ).padStart(2, '0')}`
+
   return (
-    <section className={`stage is-${phase}${variant === 'immersive' ? ' stage--immersive' : ''}`}>
-      <div className="stage__deco stage__deco--a" />
-      <div className="stage__deco stage__deco--b" />
-      <div className="stage__deco stage__deco--c" />
+    <section
+      className={`stage is-${phase} stage--photo${day ? '' : ' stage--night'}${
+        variant === 'immersive' ? ' stage--immersive' : ''
+      }`}
+      style={{ ['--photo' as string]: `url(${photo})` } as React.CSSProperties}
+    >
+      <div className="stage__meta" aria-hidden>
+        <span>DAFEIYU LEDGER</span>
+        <span>NO. {today.replace(/\./g, '')}</span>
+      </div>
+
+      {phase === 'after' && !poking && (
+        <span className="stage__stamp" aria-hidden>
+          已结清
+        </span>
+      )}
 
       <div className="stage__counter">
         <MoneyCounter value={value} active={phase === 'working'} caption={caption} />
@@ -185,7 +219,10 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
               {phase === 'working'
                 ? `还剩 ${fmtDuration(left)}`
                 : phase === 'lunch' || phase === 'dinner'
-                  ? `${phase === 'lunch' ? '午休' : '晚休'}中 · 还剩 ${fmtDuration(left)}`
+                  ? `${phase === 'lunch' ? '午休' : '晚休'} ${
+                      (phase === 'lunch' ? config.lunchStart : config.dinnerStart) + '–' +
+                      (phase === 'lunch' ? config.lunchEnd : config.dinnerEnd)
+                    } · ${phase === 'lunch' ? config.lunchEnd : config.dinnerEnd} 继续`
                   : phase === 'before'
                     ? `${config.start} 开工`
                     : `${config.end} 已收工`}

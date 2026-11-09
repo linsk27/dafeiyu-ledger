@@ -17,8 +17,10 @@ export interface SalaryConfig {
   dinnerStart: string
   /** 晚休结束 HH:MM */
   dinnerEnd: string
-  /** 计薪天数；null = 按当月工作日自动算 */
+  /** 计薪天数；null = 按当月工作日自动算（旧字段，手动模式也兼容它） */
   payDays: number | null
+  /** 手动挑的具体计薪日（YYYY-MM-DD）；null = 自动 */
+  workDays: string[] | null
 }
 
 export const DEFAULT_CONFIG: SalaryConfig = {
@@ -32,6 +34,7 @@ export const DEFAULT_CONFIG: SalaryConfig = {
   dinnerStart: '18:00',
   dinnerEnd: '18:30',
   payDays: null,
+  workDays: null,
 }
 
 export type Phase = 'before' | 'working' | 'lunch' | 'dinner' | 'after'
@@ -67,7 +70,27 @@ export function payDaysAuto(now: Date): number {
   return Math.max(1, n)
 }
 
+/** 本地时区的 YYYY-MM-DD（不要用 toISOString，会按 UTC 掉一天） */
+export function isoDate(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${day}`
+}
+
+/** 某月所有「周一~周五」的日期 */
+export function monthWorkdays(year: number, month: number): string[] {
+  const total = new Date(year, month + 1, 0).getDate()
+  const out: string[] = []
+  for (let d = 1; d <= total; d += 1) {
+    const date = new Date(year, month, d)
+    const wd = date.getDay()
+    if (wd !== 0 && wd !== 6) out.push(isoDate(date))
+  }
+  return out
+}
+
 export function payDaysOf(c: SalaryConfig, now: Date): number {
+  if (c.workDays) return Math.max(1, c.workDays.length)
   return c.payDays && c.payDays > 0 ? c.payDays : payDaysAuto(now)
 }
 
@@ -276,5 +299,8 @@ export function clampConfig(c: SalaryConfig): SalaryConfig {
     dinnerStart: hm(c.dinnerStart, '18:00'),
     dinnerEnd: hm(c.dinnerEnd, '18:30'),
     payDays,
+    workDays: Array.isArray(c.workDays)
+      ? [...new Set(c.workDays.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)))].sort()
+      : null,
   }
 }

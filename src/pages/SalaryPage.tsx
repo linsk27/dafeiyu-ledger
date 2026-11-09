@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { SparkIcon, WalletIcon } from '../components/Icons'
+import { DayPicker } from '../components/DayPicker'
 import { TimeField } from '../components/TimeField'
 import {
   breakInfo,
   clampConfig,
   dailySalary,
   fmtMoney,
-  payDaysAuto,
+  monthWorkdays,
   payDaysOf,
   perHour,
   perSecond,
@@ -31,7 +32,6 @@ export function SalaryPage({ config, onSave }: Props) {
   const [draft, setDraft] = useState<SalaryConfig>(config)
   const now = new Date()
 
-  const auto = payDaysAuto(now)
 
   const preview = useMemo(() => {
     const c = clampConfig(draft)
@@ -111,37 +111,46 @@ export function SalaryPage({ config, onSave }: Props) {
             <div className="field">
               <span className="field__label">计薪天数</span>
               <div className="input input--combine">
-                {draft.payDays === null ? (
-                  <b className="numeric input__value">{auto}</b>
-                ) : (
-                  <input
-                    type="number"
-                    min={1}
-                    max={31}
-                    step={1}
-                    value={draft.payDays}
-                    onChange={(e) => update('payDays', Number(e.target.value))}
-                  />
-                )}
+                <b className="numeric input__value">{preview.payDays}</b>
                 <span className="input__suffix">天 / 月</span>
                 <div className="segmented segmented--xs">
                   <button
                     type="button"
-                    className={draft.payDays === null ? 'is-on' : ''}
-                    onClick={() => update('payDays', null)}
+                    className={draft.workDays === null ? 'is-on' : ''}
+                    onClick={() => {
+                      update('workDays', null)
+                      update('payDays', null)
+                    }}
                   >
                     自动
                   </button>
                   <button
                     type="button"
-                    className={draft.payDays !== null ? 'is-on' : ''}
-                    onClick={() => update('payDays', draft.payDays ?? auto)}
+                    className={draft.workDays !== null ? 'is-on' : ''}
+                    onClick={() => {
+                      if (draft.workDays) return
+                      const now2 = new Date()
+                      update('workDays', monthWorkdays(now2.getFullYear(), now2.getMonth()))
+                      update('payDays', null)
+                    }}
                   >
                     手动
                   </button>
                 </div>
               </div>
+              {draft.workDays === null ? (
+                <span className="field__note">当月周一至周五，{preview.payDays} 天</span>
+              ) : (
+                <span className="field__note">已勾 {draft.workDays.length} 天，可跨月</span>
+              )}
             </div>
+
+            {draft.workDays !== null && (
+              <DayPicker
+                value={draft.workDays}
+                onChange={(days) => update('workDays', days)}
+              />
+            )}
 
             <TimeField
               label="上班时间"
@@ -253,6 +262,13 @@ export function SalaryPage({ config, onSave }: Props) {
           </div>
 
           <ul className="receipt__rows">
+            <li>
+              <span>计薪天数</span>
+              <b className="numeric">
+                {preview.payDays} 天
+                {draft.workDays === null ? '（自动）' : ''}
+              </b>
+            </li>
             <li>
               <span>每天工资</span>
               <b className="numeric">¥{fmtMoney(preview.daily, 2)}</b>

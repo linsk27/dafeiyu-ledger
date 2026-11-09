@@ -910,7 +910,7 @@ button {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .card {
@@ -2864,4 +2864,165 @@ textarea,
     padding: 6px 9px;
     font-size: 11.5px;
   }
+}
+
+/* ---------- 手动计薪日：月历勾选 ---------- */
+.field__note {
+  display: block;
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.2px;
+}
+
+.dayPick {
+  grid-column: 1 / -1;
+  padding: 10px 10px 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(120, 140, 190, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.dayPick__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dayPick__nav {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 9px;
+  background: rgba(86, 116, 196, 0.08);
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.dayPick__nav:hover {
+  background: rgba(86, 116, 196, 0.16);
+}
+
+.dayPick__nav:active {
+  transform: scale(0.94);
+}
+
+.dayPick__month {
+  font-family: var(--font-num);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.dayPick__count {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--blue, #4b6fe0);
+  background: rgba(86, 126, 232, 0.1);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.dayPick__week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.dayPick__week span {
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.dayPick__week span.is-weekend {
+  color: rgba(150, 160, 185, 0.75);
+}
+
+.dayPick__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.dayPick__blank {
+  height: 30px;
+}
+
+.dayPick__day {
+  height: 30px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(120, 140, 190, 0.07);
+  color: var(--ink);
+  font-family: var(--font-num);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.dayPick__day:hover {
+  background: rgba(86, 126, 232, 0.16);
+}
+
+.dayPick__day:active {
+  transform: scale(0.94);
+}
+
+.dayPick__day.is-weekend {
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.dayPick__day.is-on {
+  background: linear-gradient(150deg, #6f93f4, #4a6ee0);
+  color: #fff;
+  box-shadow: 0 6px 14px -8px rgba(74, 110, 224, 0.9);
+}
+
+.dayPick__day.is-on.is-weekend {
+  background: linear-gradient(150deg, #90aef8, #6f8ff0);
+}
+
+.dayPick__day.is-today {
+  box-shadow: inset 0 0 0 1.5px rgba(74, 110, 224, 0.55);
+}
+
+.dayPick__day.is-on.is-today {
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+}
+
+.dayPick__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.dayPick__actions button {
+  border: 1px solid rgba(120, 140, 190, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink-2);
+  font-size: 11.5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dayPick__actions button:hover {
+  background: rgba(86, 126, 232, 0.12);
+  color: var(--ink);
+}
+
+.dayPick__tip {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-3);
 }

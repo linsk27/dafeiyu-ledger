@@ -62,6 +62,11 @@ body,
   height: 100%;
 }
 
+/* 内容变高触发滚动条时，别让整页横向跳 15px */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   -webkit-tap-highlight-color: transparent;
@@ -2132,7 +2137,9 @@ button {
 
 .page--salary {
   flex: 1;
-  justify-content: safe center;
+  /* 顶部对齐：展开日历只会往下长，不会把整块推上去 */
+  justify-content: flex-start;
+  align-content: flex-start;
 }
 /* ---------- 矮屏：整体压缩，保证一屏不滚 ---------- */
 @media (max-height: 840px) {

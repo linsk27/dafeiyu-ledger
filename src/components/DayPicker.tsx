@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { isoDate, monthWorkdays } from '../lib/salary'
 
 interface Props {
-  /** 选中的日期（YYYY-MM-DD），固定落在一个月内 */
+  /** 选中的日期（YYYY-MM-DD），固定落在当前这一个月 */
   value: string[]
   onChange: (days: string[]) => void
 }
@@ -10,36 +10,27 @@ interface Props {
 const WEEK = ['一', '二', '三', '四', '五', '六', '日']
 
 /**
- * 手动计薪日：月历，点哪天算哪天。
- * 计薪天数是「月薪 ÷ 这个数」，所以只认一个月，不跨月累加；
- * 换月时按新月份的周一~周五重新预选，再手动改差异。
+ * 手动计薪日：只画「本月」这一张月历，点哪天算哪天。
+ *
+ * 不做跨月：计薪天数是「月薪 ÷ 这个数」，跨月累加会把日薪摊薄，
+ * 而且会让同一个数字既像 11 月又像 12 月。要改月份就等下个月自动切。
  */
 export function DayPicker({ value, onChange }: Props) {
   const today = new Date()
-  const [view, setView] = useState(() => {
-    const first = value[0] ? new Date(`${value[0]}T00:00:00`) : today
-    return { y: first.getFullYear(), m: first.getMonth() }
-  })
+  const year = today.getFullYear()
+  const month = today.getMonth()
 
-  const monthDays = useMemo(() => monthWorkdays(view.y, view.m), [view])
+  const monthDays = useMemo(() => monthWorkdays(year, month), [year, month])
   const picked = useMemo(() => new Set(value), [value])
 
   const cells = useMemo(() => {
-    const total = new Date(view.y, view.m + 1, 0).getDate()
-    const lead = (new Date(view.y, view.m, 1).getDay() + 6) % 7 // 周一为第一列
+    const total = new Date(year, month + 1, 0).getDate()
+    const lead = (new Date(year, month, 1).getDay() + 6) % 7 // 周一为第一列
     const list: (string | null)[] = Array.from({ length: lead }, () => null)
-    for (let d = 1; d <= total; d += 1) list.push(isoDate(new Date(view.y, view.m, d)))
+    for (let d = 1; d <= total; d += 1) list.push(isoDate(new Date(year, month, d)))
     while (list.length % 7 !== 0) list.push(null)
     return list
-  }, [view])
-
-  const shiftMonth = (delta: number) => {
-    const next = new Date(view.y, view.m + delta, 1)
-    const ym = { y: next.getFullYear(), m: next.getMonth() }
-    setView(ym)
-    // 换月就不跨月累加，直接按新月份的周一~周五重新预选
-    onChange(monthWorkdays(ym.y, ym.m))
-  }
+  }, [year, month])
 
   const toggle = (iso: string) => {
     const next = new Set(picked)
@@ -53,15 +44,9 @@ export function DayPicker({ value, onChange }: Props) {
   return (
     <div className="dayPick">
       <div className="dayPick__head">
-        <button type="button" className="dayPick__nav" onClick={() => shiftMonth(-1)} aria-label="上个月">
-          ‹
-        </button>
         <b className="dayPick__month">
-          {view.y} 年 {view.m + 1} 月
+          {year} 年 {month + 1} 月
         </b>
-        <button type="button" className="dayPick__nav" onClick={() => shiftMonth(1)} aria-label="下个月">
-          ›
-        </button>
         <span className="dayPick__count">已选 {value.length} 天</span>
       </div>
 
@@ -104,9 +89,9 @@ export function DayPicker({ value, onChange }: Props) {
         <button
           type="button"
           onClick={() => {
-            const total = new Date(view.y, view.m + 1, 0).getDate()
+            const total = new Date(year, month + 1, 0).getDate()
             onChange(
-              Array.from({ length: total }, (_, i) => isoDate(new Date(view.y, view.m, i + 1))),
+              Array.from({ length: total }, (_, i) => isoDate(new Date(year, month, i + 1))),
             )
           }}
         >
@@ -118,7 +103,7 @@ export function DayPicker({ value, onChange }: Props) {
       </div>
 
       <p className="dayPick__tip">
-        法定节假日点掉、调休补班的周六点上来；换月会按新月份的工作日重新预选。
+        法定节假日点掉、调休补班的周六点上来；这里只算本月，跨月会把日薪摊薄。
       </p>
     </div>
   )

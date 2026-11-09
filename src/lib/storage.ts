@@ -1,4 +1,10 @@
-import { clampConfig, DEFAULT_CONFIG, minutesOf, type SalaryConfig } from './salary'
+import {
+  clampConfig,
+  DEFAULT_CONFIG,
+  minutesOf,
+  monthWorkdays,
+  type SalaryConfig,
+} from './salary'
 
 const KEY = 'dafeiyu-ledger:v2'
 const LEGACY = 'dafeiyu-ledger:v1'
@@ -44,6 +50,16 @@ export function loadConfig(): SalaryConfig | null {
         merged.lunchOn = minutesOf(merged.lunchEnd) !== minutesOf(merged.lunchStart)
       }
       if (!('dinnerOn' in saved)) merged.dinnerOn = false
+
+      // 手动挑的日期只对当月有效：跨月了就按本月工作日重算，
+      // 免得十一月的 21 天被拿来当十二月的分母
+      if (merged.workDays && merged.workDays.length > 0) {
+        const now = new Date()
+        const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        if (!merged.workDays.some((d) => d.startsWith(prefix))) {
+          merged.workDays = monthWorkdays(now.getFullYear(), now.getMonth())
+        }
+      }
       return clampConfig(merged)
     }
     const migrated = migrate()

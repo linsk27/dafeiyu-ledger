@@ -87,14 +87,15 @@ function isDayHour(h: number) {
 }
 
 /**
- * 判断「这一屏该不该是夜里」用的钟点：
- * - 午休/晚休看休息本身几点开始（晚休 18:00 就该是夜里那张床，跟现在几点无关）
+ * 判断「这一屏该不该是夜里」：
+ * - 晚休 = 夜里那张床，写死（17:10 的晚休也该是台灯蓝床）
+ * - 午休看它自己几点开始（夜班 02:00 的午休也是黑的）
  * - 其余时段看当下的真实钟点
  */
-function hourFor(phase: Phase, config: SalaryConfig) {
-  if (phase === 'lunch') return Math.floor(minutesOf(config.lunchStart) / 60) % 24
-  if (phase === 'dinner') return Math.floor(minutesOf(config.dinnerStart) / 60) % 24
-  return new Date().getHours()
+function isNightScene(phase: Phase, config: SalaryConfig) {
+  if (phase === 'dinner') return true
+  if (phase === 'lunch') return !isDayHour(Math.floor(minutesOf(config.lunchStart) / 60) % 24)
+  return !isDayHour(new Date().getHours())
 }
 
 /**
@@ -151,7 +152,7 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
               ? '还没开始，先攒点力气'
               : '今天到此为止，辛苦了'
 
-  const day = isDayHour(hourFor(phase, config))
+  const day = !isNightScene(phase, config)
   const photo = bgFor(phase, day)
   const today = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(
     now.getDate(),

@@ -11,6 +11,7 @@ import {
   monthWorkdays,
   payDaysOf,
   perHour,
+  timeline,
   perSecond,
   workSeconds,
   type SalaryConfig,
@@ -55,6 +56,39 @@ export function SalaryPage({ config, onSave }: Props) {
 
   const lunch = breakInfo(draft, 'lunch')
   const dinner = breakInfo(draft, 'dinner')
+
+  /** 分钟数 → HH:MM（跨零点的用 % 落回 0–1439） */
+  const hm = (min: number) => {
+    const v = ((Math.round(min) % 1440) + 1440) % 1440
+    return `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`
+  }
+
+  /**
+   * 打开休息开关时，如果当前时间落在班次外（默认 18:00–18:30 撞上 18:00 下班很常见），
+   * 直接把它挪进班次里，别让用户开了开关还是灰的。
+   */
+  const toggleBreak = (id: 'lunch' | 'dinner') => {
+    const onKey = id === 'lunch' ? 'lunchOn' : 'dinnerOn'
+    if (draft[onKey]) {
+      update(onKey, false)
+      return
+    }
+    const probe = breakInfo({ ...draft, [onKey]: true } as SalaryConfig, id)
+    if (probe.span) {
+      update(onKey, true)
+      return
+    }
+    const { s: st, e } = timeline(draft)
+    const len = id === 'lunch' ? 60 : 40
+    const from = id === 'lunch' ? st + 4 * 60 : e - len - 10
+    const to = from + len
+    setDraft((d) => ({
+      ...d,
+      [onKey]: true,
+      [id === 'lunch' ? 'lunchStart' : 'dinnerStart']: hm(from),
+      [id === 'lunch' ? 'lunchEnd' : 'dinnerEnd']: hm(to),
+    }))
+  }
   const lunchMinutes = lunch.span ? lunch.span.to - lunch.span.from : 0
   const dinnerMinutes = dinner.span ? dinner.span.to - dinner.span.from : 0
 
@@ -168,7 +202,7 @@ export function SalaryPage({ config, onSave }: Props) {
               title="午休"
               note={lunch.on ? (lunch.invalid ? '起止一样' : `${lunchMinutes} 分钟`) : '没有午休'}
               on={draft.lunchOn}
-              onToggle={() => update('lunchOn', !draft.lunchOn)}
+              onToggle={() => toggleBreak('lunch')}
             />
             <TimeField
               label="午休开始"
@@ -197,7 +231,7 @@ export function SalaryPage({ config, onSave }: Props) {
               title="晚休"
               note={dinner.on ? (dinner.invalid ? '起止一样' : `${dinnerMinutes} 分钟`) : '没有晚休'}
               on={draft.dinnerOn}
-              onToggle={() => update('dinnerOn', !draft.dinnerOn)}
+              onToggle={() => toggleBreak('dinner')}
             />
             <TimeField
               label="晚休开始"

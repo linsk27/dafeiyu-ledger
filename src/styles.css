@@ -67,6 +67,23 @@ html {
   scrollbar-gutter: stable;
 }
 
+:root {
+  /* 刘海屏安全区：装到 iPhone 主屏幕后、或安卓 edge-to-edge 时才有值 */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* iOS 上 100% 会算上 Safari 工具栏，用 dvh 让内容不被折在下面 */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
 body {
   margin: 0;
   -webkit-tap-highlight-color: transparent;
@@ -102,7 +119,8 @@ button {
   display: flex;
   min-height: 100%;
   gap: 26px;
-  padding: 22px;
+  padding: calc(22px + var(--safe-top)) calc(22px + var(--safe-right)) calc(22px + var(--safe-bottom))
+    calc(22px + var(--safe-left));
   width: 100%;
   max-width: 1760px;
   margin-inline: auto;
@@ -260,7 +278,7 @@ button {
 .siteFoot {
   position: fixed;
   right: max(20px, calc((100vw - 1760px) / 2 + 24px));
-  bottom: 14px;
+  bottom: calc(14px + var(--safe-bottom));
   z-index: 20;
   display: flex;
   justify-content: flex-end;
@@ -942,9 +960,12 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .stage__meterValue {
+  white-space: nowrap;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
@@ -1397,7 +1418,8 @@ button {
 @media (max-width: 1080px) {
   .app {
     flex-direction: column;
-    padding: 14px;
+    padding: calc(14px + var(--safe-top)) calc(14px + var(--safe-right)) calc(14px + var(--safe-bottom))
+      calc(14px + var(--safe-left));
   }
 
   .sidebar {
@@ -1817,7 +1839,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px 30px 18px;
+  padding: calc(24px + var(--safe-top)) calc(30px + var(--safe-right)) calc(18px + var(--safe-bottom))
+    calc(30px + var(--safe-left));
   color: #fff;
   background:
     radial-gradient(900px 620px at 12% -6%, #2c3d78 0%, rgba(44, 61, 120, 0) 62%),
@@ -1939,6 +1962,22 @@ button {
 .stage--immersive .stage__meter {
   width: min(440px, 34vw);
 }
+@media (max-width: 560px) {
+  .stage--immersive .stage__foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .stage--immersive .stage__meter {
+    width: 100%;
+  }
+
+  .stage__meterTop {
+    gap: 10px;
+  }
+}
+
 /* ---------- 计薪天数 / 分段小控件 ---------- */
 .segmented--xs {
   padding: 3px;

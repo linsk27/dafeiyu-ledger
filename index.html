@@ -3,6 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/assets/fish-work.webp" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- 装到 iPhone 主屏幕后按全屏 app 跑：隐藏 Safari 地址栏，状态栏跟随配色 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="大肥鱼账本" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- iOS 启动图：没有这段，从主屏幕点开是一段纯白 -->
+    <link rel="apple-touch-startup-image" href="/splash/1170x2532.jpg"
+      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/1179x2556.jpg"
+      media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/1179x2556.jpg"
+      media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/1284x2778.jpg"
+      media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/1290x2796.jpg"
+      media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/splash/828x1792.jpg"
+      media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
@@ -48,7 +70,7 @@
         align-items: center;
         justify-content: center;
         gap: 14px;
-        padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+        padding: max(env(safe-area-inset-top), 20px) 24px max(env(safe-area-inset-bottom), 20px);
         background:
           radial-gradient(1100px 620px at 8% -10%, #ffe7ef 0%, rgba(255, 231, 239, 0) 62%),
           radial-gradient(980px 640px at 102% -4%, #dfe9ff 0%, rgba(223, 233, 255, 0) 58%),

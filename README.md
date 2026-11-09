@@ -150,6 +150,27 @@ cd android && ./gradlew assembleDebug
 
 需要 JDK 21（Capacitor 7 的编译目标）、Android SDK 35、build-tools 35。
 
+## iPhone
+
+**没有 `.ipa`**：iOS 的应用包必须在装了 Xcode 的 Mac 上签名，签发还需要 99 美元/年的开发者账号。这台机器两样都没有，所以 iPhone 走 PWA——直接从 Safari 装到主屏幕，图标、启动图、全屏、离线缓存都有，用起来和 App 差不多：
+
+1. Safari 打开部署地址（**必须是 HTTPS**，`http` 装不上）
+2. 底部「分享」→「添加到主屏幕」
+3. 从主屏幕打开，就是无地址栏的全屏应用
+
+已经为它做好的适配：
+
+- `apple-touch-icon`（180×180 满幅方形，圆角交给 iOS 自己切）和 5 组 `apple-touch-startup-image` 启动图，覆盖 1170×2532 / 1284×2778 / 1179×2556 / 1290×2796 / 828×1792
+- `manifest.webmanifest`：`display: standalone`、`orientation: portrait`、192/512 图标 + 一张 maskable
+- 刘海与底部横条：`env(safe-area-inset-*)` 收进 `--safe-top/bottom/left/right` 四个变量，外层 padding、固定页脚、沉浸层都让开
+- `100dvh`（Safari 的 `100%` 会把地址栏算进去，底部内容容易被折住）
+- 输入框字号 19px（iOS 的规则是 <16px 聚焦时自动放大整页）
+
+两处 iOS 与 Android 的行为差异：
+
+- Safari 不支持 **Fullscreen API**，所以沉浸模式里没有「重新全屏」按钮，点「沉浸模式」直接进全屏视图（用 `position: fixed` 铺满，不是真全屏）
+- 触屏没有 hover，指针的 hover 态不会出现；`active` 的下沉反馈保留
+
 ## 踩过的坑
 
 - **字体抽搐**：`@fontsource` 把中文切成 180 多个 unicode-range 分片，首屏先出系统字体、几百毫秒后换字，行宽一变整页回流。改成单文件 woff2 + `preload` + `font-display: block`，CLS 归零，样式表也从 181 KB 降到 31 KB。

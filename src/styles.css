@@ -466,6 +466,11 @@ button {
   font-size: 12px;
 }
 
+.segmented button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
 .segmented button.is-on {
   background: #fff;
   color: var(--ink);

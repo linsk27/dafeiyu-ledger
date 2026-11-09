@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Stage } from '../components/Stage'
 import { SparkIcon } from '../components/Icons'
 import {
+  breakInfo,
   dailySalary,
   earnedAt,
   fmtMoney,
@@ -55,6 +56,8 @@ export function LedgerPage({
   const daily = dailySalary(config, now)
   const hourly = perHour(config, now)
   const progress = progressOf(now, config)
+  // 午休 / 晚休是否真的生效（开关开着，且这段落在班次时间轴里）
+  const breakSpan = (id: 'lunch' | 'dinner') => breakInfo(config, id).span !== null
   const earned = earnedAt(now, config)
 
   return (
@@ -101,16 +104,23 @@ export function LedgerPage({
           >
             自动
           </button>
-          {PREVIEWS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={preview === p.id ? 'is-on' : ''}
-              onClick={() => onPreview(p.id)}
-            >
-              {p.label}
-            </button>
-          ))}
+          {PREVIEWS.map((p) => {
+            // 这段休息没生效（关掉了 / 不在班次内）时，预览按钮置灰，
+            // 否则点进去会静默落到「上班中」，看着像 bug
+            const off = p.id === 'lunch' || p.id === 'dinner' ? !breakSpan(p.id) : false
+            return (
+              <button
+                key={p.id}
+                type="button"
+                className={preview === p.id ? 'is-on' : ''}
+                disabled={off}
+                title={off ? `这段${p.label}没生效：开关关着，或时间不在班次内` : undefined}
+                onClick={() => onPreview(p.id)}
+              >
+                {p.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 

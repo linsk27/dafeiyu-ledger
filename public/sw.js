@@ -5,7 +5,7 @@
  * - 同源静态资源（字体 / 脚本 / 样式 / 图片）：stale-while-revalidate
  * 路径一律用相对写法：站点可能挂在 /dafeiyu-ledger/ 这样的子路径下。
  */
-const CACHE = 'dafeiyu-v2'
+const CACHE = 'dafeiyu-v3'
 
 const PRECACHE = [
   './',
@@ -53,7 +53,9 @@ self.addEventListener('fetch', (event) => {
   // 页面导航：先要新的，断网时用缓存里的壳
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      // no-store：GitHub Pages 给 HTML 的 max-age 是 600s，
+      // 不加这个，fetch 会直接把 HTTP 缓存里那份旧壳还回来（新版本要等十分钟）
+      fetch(req, { cache: 'no-store' })
         .then((resp) => {
           putInCache(req, resp)
           return resp

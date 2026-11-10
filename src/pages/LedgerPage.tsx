@@ -6,6 +6,7 @@ import {
   dailySalary,
   earnedAt,
   fmtMoney,
+  monthEarnedAt,
   payDaysOf,
   perHour,
   progressOf,
@@ -55,6 +56,7 @@ export function LedgerPage({
 
   const daily = dailySalary(config, now)
   const hourly = perHour(config, now)
+  const month = monthEarnedAt(config, now)
   const progress = progressOf(now, config)
   // 午休 / 晚休是否真的生效（开关开着，且这段落在班次时间轴里）
   const breakSpan = (id: 'lunch' | 'dinner') => breakInfo(config, id).span !== null
@@ -135,18 +137,29 @@ export function LedgerPage({
           delay={0}
         />
         <StatCard
+          label="本月已赚"
+          value={`¥${fmtMoney(month.earned, 2)}`}
+          note={
+            month.countsToday
+              ? `已上 ${month.done + 1} / ${month.total} 个工作日`
+              : `已上 ${month.done} / ${month.total} 个工作日`
+          }
+          tone="violet"
+          delay={0.06}
+        />
+        <StatCard
           label="日薪"
           value={`¥${fmtMoney(daily, 2)}`}
           note={`净工时 ${(workSeconds(config) / 3600).toFixed(1)} 小时`}
           tone="blue"
-          delay={0.06}
+          delay={0.12}
         />
         <StatCard
           label="时薪"
           value={`¥${fmtMoney(hourly, 2)}`}
           note="月薪 ÷ 计薪天数 ÷ 净工时"
           tone="pink"
-          delay={0.12}
+          delay={0.18}
         />
       </div>
 
@@ -181,7 +194,7 @@ function StatCard({
   label: string
   value: string
   note: string
-  tone: 'green' | 'blue' | 'pink'
+  tone: 'green' | 'violet' | 'blue' | 'pink'
   delay: number
 }) {
   return (

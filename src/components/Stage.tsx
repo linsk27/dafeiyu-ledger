@@ -118,10 +118,15 @@ function isNightScene(phase: Phase, config: SalaryConfig) {
  */
 function bgFor(phase: Phase, day: boolean) {
   // 休息躺床，干活在工位；都分白天/夜里两版
-  if (phase === 'lunch' || phase === 'dinner') {
-    return day ? 'bg-rest-day.jpg' : 'bg-rest-night.jpg'
-  }
-  return day ? 'bg-day.jpg' : 'bg-night.jpg'
+  const file =
+    phase === 'lunch' || phase === 'dinner'
+      ? day
+        ? 'bg-rest-day.jpg'
+        : 'bg-rest-night.jpg'
+      : day
+        ? 'bg-day.jpg'
+        : 'bg-night.jpg'
+  return `${import.meta.env.BASE_URL}assets/${file}`
 }
 
 export function Stage({ config, now, phase, variant = 'card' }: Props) {
@@ -177,7 +182,11 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
       className={`stage is-${phase} stage--photo${day ? '' : ' stage--night'}${
         variant === 'immersive' ? ' stage--immersive' : ''
       }`}
-      style={{ ['--photo' as string]: `url(./${photo})` } as React.CSSProperties}
+      style={
+        {
+          ['--photo' as string]: `url("${new URL(photo, document.baseURI).href}")`,
+        } as React.CSSProperties
+      }
     >
       <div className="stage__meta" aria-hidden>
         <span>DAFEIYU LEDGER</span>

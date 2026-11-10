@@ -94,6 +94,32 @@ export function payDaysOf(c: SalaryConfig, now: Date): number {
   return c.payDays && c.payDays > 0 ? c.payDays : payDaysAuto(now)
 }
 
+/**
+ * 本月已赚：把这个月「已经过完的计薪日」全算满，再加上今天赚到的。
+ * 只往前看，不预测未来；今天不是计薪日就只算已过完的那些天。
+ */
+export function monthEarnedAt(
+  c: SalaryConfig,
+  now: Date,
+): { earned: number; done: number; total: number; countsToday: boolean } {
+  const y = now.getFullYear()
+  const mo = now.getMonth()
+  const today = isoDate(now)
+  const ym = `${y}-${String(mo + 1).padStart(2, '0')}`
+  // 手动勾选的日期可能停留上个月，这里只认本月的；没有就退回周一到周五
+  const picked = (c.workDays ?? []).filter((d) => d.startsWith(ym))
+  const days = picked.length > 0 ? picked : monthWorkdays(y, mo)
+  const done = days.filter((d) => d < today).length
+  const countsToday = days.includes(today)
+  const perDay = dailySalary(c, now)
+  return {
+    earned: done * perDay + (countsToday ? earnedAt(now, c) : 0),
+    done,
+    total: days.length,
+    countsToday,
+  }
+}
+
 export function dailySalary(c: SalaryConfig, now: Date): number {
   const m = Number.isFinite(c.monthly) ? Math.max(0, c.monthly) : 0
   return m / payDaysOf(c, now)

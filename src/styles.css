@@ -4,7 +4,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url('/fonts/zcool-kuaile-cn.woff2?v=1') format('woff2');
+  src: url('/fonts/zcool-kuaile-subset.woff2?v=2') format('woff2');
 }
 
 @font-face {

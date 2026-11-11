@@ -292,7 +292,7 @@ export function SalaryPage({ config, onSave }: Props) {
           <div className="receipt__hero">
             <span className="receipt__heroLabel">每秒进账</span>
             <div className="receipt__heroValue numeric">¥{preview.second.toFixed(6)}</div>
-            <img src={`${import.meta.env.BASE_URL}assets/fish-rich.webp`} alt="" className="receipt__fish" />
+            <img src={`${import.meta.env.BASE_URL}assets/fish-receipt.webp`} alt="" className="receipt__fish" />
           </div>
 
           <ul className="receipt__rows">

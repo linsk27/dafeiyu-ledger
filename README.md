@@ -191,6 +191,32 @@ git add -A && git commit -m "deploy" && git push -f <remote> gh-pages:gh-pages
 - Safari 不支持 **Fullscreen API**，所以沉浸模式里没有「重新全屏」按钮，点「沉浸模式」直接进全屏视图（用 `position: fixed` 铺满，不是真全屏）
 - 触屏没有 hover，指针的 hover 态不会出现；`active` 的下沉反馈保留
 
+## 体积与缓存
+
+首屏要下载的东西从 **1.5 MB 压到了 ~450 KB**（brotli 后），主要三件事：
+
+| 资源 | 之前 | 现在 | 做法 |
+|---|---|---|---|
+| 中文字体 | 709 KB | **73 KB** | `python scripts/subset-font.py` 按实际用字裁剪（801 个字） |
+| 角色图（8 张） | 2.2 MB | **1.1 MB** | `python scripts/optimize-images.py` 按显示尺寸重采样（最长边 900） |
+| 背景图（4 张） | 1.05 MB | **0.32 MB** | 同上，1920 宽 + WebP |
+| 加载动画 | 76 KB | 38 KB | 同上 |
+| 点一下才用的动作图 | 首屏就下载 250 KB | 延迟加载，只在鼠标靠近 / 1.2s 后挂载 | `Stage.tsx` 的 `pokeArmed` |
+
+两个脚本都放在 `scripts/` 下，改了图或加了界面文案就重跑一次：
+
+```bash
+python scripts/optimize-images.py    # 重采样 public/assets 里的图
+python scripts/subset-font.py        # 重新裁字体（会自动扫 src 和 index.html 用到的字）
+```
+
+> 字体子集是「按当前用字生成」的：**以后界面里加新汉字，记得重跑 `subset-font.py`**，
+> 漏掉的字不会消失，只会回落到系统字体。
+
+缓存方面：GitHub Pages 固定给 `Cache-Control: max-age=600`，改不了；重复访问靠 Service Worker
+（静态资源 stale-while-revalidate、导航 `no-store` 拉新壳）。换成 Cloudflare Pages / Netlify 的话，
+仓库里的 `public/_headers` 会让带 hash 的资源直接 `immutable` 缓存一年。
+
 ## 踩过的坑
 
 - **字体抽搐**：`@fontsource` 把中文切成 180 多个 unicode-range 分片，首屏先出系统字体、几百毫秒后换字，行宽一变整页回流。改成单文件 woff2 + `preload` + `font-display: block`，CLS 归零，样式表也从 181 KB 降到 31 KB。

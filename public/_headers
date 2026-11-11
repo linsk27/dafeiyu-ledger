@@ -1,0 +1,17 @@
+# Cloudflare Pages / Netlify 会读这个文件；GitHub Pages 会忽略它（那边由 _headers 管不了）。
+# 带 hash 的资源可以放心缓存一年；入口 HTML 必须短缓存，否则用户拿不到新版本。
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/splash/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*
+  Cache-Control: public, max-age=0, must-revalidate

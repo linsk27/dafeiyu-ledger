@@ -5,14 +5,14 @@
  * - 同源静态资源（字体 / 脚本 / 样式 / 图片）：stale-while-revalidate
  * 路径一律用相对写法：站点可能挂在 /dafeiyu-ledger/ 这样的子路径下。
  */
-const CACHE = 'dafeiyu-v3'
+const CACHE = 'dafeiyu-v4'
 
 const PRECACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/apple-touch-icon.png',
-  './fonts/zcool-kuaile-cn.woff2?v=1',
+  './fonts/zcool-kuaile-subset.woff2?v=2',
   './fonts/baloo-2-500.woff2?v=1',
   './fonts/baloo-2-600.woff2?v=1',
   './fonts/baloo-2-700.woff2?v=1',

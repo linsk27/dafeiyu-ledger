@@ -121,19 +121,28 @@ function bgFor(phase: Phase, day: boolean) {
   const file =
     phase === 'lunch' || phase === 'dinner'
       ? day
-        ? 'bg-rest-day.jpg'
-        : 'bg-rest-night.jpg'
+        ? 'bg-rest-day.webp'
+        : 'bg-rest-night.webp'
       : day
-        ? 'bg-day.jpg'
-        : 'bg-night.jpg'
+        ? 'bg-day.webp'
+        : 'bg-night.webp'
   return `${import.meta.env.BASE_URL}assets/${file}`
 }
 
 export function Stage({ config, now, phase, variant = 'card' }: Props) {
   const [poking, setPoking] = useState(false)
+  const [pokeArmed, setPokeArmed] = useState(false)
   const timer = useRef<number | undefined>(undefined)
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  // 「被戳」那张图有一百多 KB，首屏不需要它：等页面稳下来或鼠标靠上去再挂，
+  // 这样第一次点也不至于空白（1.2s 足够把图拉回来）。
+  useEffect(() => {
+    if (!POKES[phase]) return
+    const t = window.setTimeout(() => setPokeArmed(true), 1200)
+    return () => window.clearTimeout(t)
+  }, [phase])
 
   useEffect(() => {
     setPoking(false)
@@ -209,6 +218,8 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
           type="button"
           className={`stage__fishBtn${canPoke ? ' is-poke' : ''}${poking ? ' is-poking' : ''}`}
           onClick={handlePoke}
+          onPointerEnter={() => setPokeArmed(true)}
+          onPointerDown={() => setPokeArmed(true)}
           aria-label={canPoke ? '戳一下大肥鱼' : fish.alt}
           tabIndex={canPoke ? 0 : -1}
         >
@@ -219,7 +230,7 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
               alt={fish.alt}
               className={`stage__fish${poking && canPoke ? ' is-dim' : ''}`}
             />
-            {poke && (
+            {poke && pokeArmed && (
               <img
                 key={`poke-${phase}`}
                 src={poke.src}

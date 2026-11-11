@@ -1,0 +1,35 @@
+{
+  "name": "大肥鱼账本",
+  "short_name": "大肥鱼账本",
+  "description": "每一秒都在进账的可爱账本 —— 上班的时候，看着钱一秒一秒长出来。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./?src=homescreen",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#FDF6F4",
+  "theme_color": "#FDF6F4",
+  "categories": ["finance", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

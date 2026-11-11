@@ -199,8 +199,8 @@ git add -A && git commit -m "deploy" && git push -f <remote> gh-pages:gh-pages
 |---|---|---|---|
 | 中文字体 | 709 KB | **73 KB** | `python scripts/subset-font.py` 按实际用字裁剪（801 个字） |
 | 角色图（8 张） | 2.2 MB | **1.1 MB** | `python scripts/optimize-images.py` 按显示尺寸重采样（最长边 900） |
-| 背景图（4 张） | 1.05 MB | **0.32 MB** | 同上，1920 宽 + WebP |
-| 加载动画 | 76 KB | 38 KB | 同上 |
+| 背景图（4 张） | 1.05 MB | **0.43 MB** | 转 WebP（保留 2560 宽，大屏不糊） |
+| 加载动画 | 76 KB | 57 KB | 同上（480 宽，三倍屏也不糊） |
 | 点一下才用的动作图 | 首屏就下载 250 KB | 延迟加载，只在鼠标靠近 / 1.2s 后挂载 | `Stage.tsx` 的 `pokeArmed` |
 
 两个脚本都放在 `scripts/` 下，改了图或加了界面文案就重跑一次：

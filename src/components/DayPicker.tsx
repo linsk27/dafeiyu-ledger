@@ -58,23 +58,26 @@ export function DayPicker({ value, onChange }: Props) {
         ))}
       </div>
 
-      <div className="dayPick__grid">
+      <div className="dayPick__grid" role="group" aria-label="计薪日">
         {cells.map((iso, i) => {
           if (!iso) return <span key={`x${i}`} className="dayPick__blank" />
           const weekend = !monthDays.includes(iso)
+          const on = picked.has(iso)
           return (
             <button
               key={iso}
               type="button"
               className={[
                 'dayPick__day',
-                picked.has(iso) ? 'is-on' : '',
+                on ? 'is-on' : '',
                 weekend ? 'is-weekend' : '',
                 iso === todayIso ? 'is-today' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
               onClick={() => toggle(iso)}
+              aria-pressed={on}
+              aria-label={`${Number(iso.slice(5, 7))} 月 ${Number(iso.slice(-2))} 日${on ? '（计薪）' : ''}`}
             >
               {Number(iso.slice(-2))}
             </button>

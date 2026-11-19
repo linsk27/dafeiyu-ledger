@@ -33,7 +33,7 @@
 :root {
   --ink: #1b2559;
   --ink-2: #5b6791;
-  --ink-3: #8d97ba;
+  --ink-3: #636e88; /* 说明文字：原来 #8d97ba 在白底只有 2.89:1，现在 5.1:1（AA） */
   --blue: #4b7bf5;
   --blue-2: #7ea5ff;
   --blue-deep: #27346f;
@@ -1085,7 +1085,7 @@ button {
 .money__caption {
   margin-top: 2px;
   font-size: 11.5px;
-  color: #8d957f;
+  color: #5f6a4b; /* 原来 #8d957f 在米绿卡上是 3.12:1，现在 5.2:1 */
 }
 
 /* 关灯版：深色小屏 + 发光数字 */
@@ -1416,6 +1416,28 @@ button {
   height: 8px;
   border-radius: 50%;
   background: #34e0a1;
+}
+
+/* Service Worker 换版后提示刷新（main.tsx 里动态插入） */
+.updateBar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--safe-bottom));
+  translate: -50% 0;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #5b87ff, #3f6bea);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 60;
+  box-shadow: 0 18px 34px -18px rgba(43, 74, 170, 0.9);
+}
+
+.updateBar:hover {
+  filter: brightness(1.06);
 }
 
 /* ---------- responsive ---------- */
@@ -3382,4 +3404,16 @@ textarea,
   font-size: 11px;
   line-height: 1.5;
   color: var(--ink-3);
+}
+
+/* 系统开了「减少动态效果」：停掉所有装饰性动画与过渡（数字本身照常跳） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

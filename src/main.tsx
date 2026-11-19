@@ -30,7 +30,21 @@ if (boot) {
 
 // 生产构建下把字体和角色图放进 Cache Storage，二次访问不再回源
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  // 首次安装时 claim() 也会触发 controllerchange，那种情况不该弹提示
+  const hadController = Boolean(navigator.serviceWorker.controller)
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => undefined)
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .catch(() => undefined)
+  })
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return
+    // 新版本已经接管，但页面里跑的还是旧的 bundle：让用户刷一下
+    const bar = document.createElement('button')
+    bar.className = 'updateBar'
+    bar.type = 'button'
+    bar.textContent = '有新版本，点这里刷新'
+    bar.addEventListener('click', () => window.location.reload())
+    document.body.appendChild(bar)
   })
 }

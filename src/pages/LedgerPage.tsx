@@ -6,6 +6,7 @@ import {
   dailySalary,
   earnedAt,
   fmtMoney,
+  isOvernightShift,
   monthEarnedAt,
   payDaysOf,
   perHour,
@@ -109,14 +110,20 @@ export function LedgerPage({
           {PREVIEWS.map((p) => {
             // 这段休息没生效（关掉了 / 不在班次内）时，预览按钮置灰，
             // 否则点进去会静默落到「上班中」，看着像 bug
-            const off = p.id === 'lunch' || p.id === 'dinner' ? !breakSpan(p.id) : false
+            const breakOff = p.id === 'lunch' || p.id === 'dinner' ? !breakSpan(p.id) : false
+            // 夜班没有「上班前」那一段：白天的 16 小时算「下班后」，点了只会静默变成别的状态
+            const nightOff = p.id === 'before' && isOvernightShift(config)
+            const off = breakOff || nightOff
+            const why = nightOff
+              ? '跨零点的班次没有「上班前」这一段，白天算作已经下班'
+              : `这段${p.label}没生效：开关关着，或时间不在班次内`
             return (
               <button
                 key={p.id}
                 type="button"
                 className={preview === p.id ? 'is-on' : ''}
                 disabled={off}
-                title={off ? `这段${p.label}没生效：开关关着，或时间不在班次内` : undefined}
+                title={off ? why : undefined}
                 onClick={() => onPreview(p.id)}
               >
                 {p.label}

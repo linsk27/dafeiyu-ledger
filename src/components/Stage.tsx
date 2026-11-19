@@ -224,8 +224,9 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
           tabIndex={canPoke ? 0 : -1}
         >
           <span className={`stage__fishStack${poking ? ' is-shake' : ''}`}>
+            {/* 不加 key：显隐只由 class 控制。加 key 会让 React 卸载重挂 <img>，
+                慢机器上能看见一下闪白（图要重新解码） */}
             <img
-              key={`base-${phase}-${poking ? 'p' : 'n'}`}
               src={fish.src}
               alt={fish.alt}
               className={`stage__fish${poking && canPoke ? ' is-dim' : ''}`}

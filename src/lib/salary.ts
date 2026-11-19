@@ -90,7 +90,10 @@ export function monthWorkdays(year: number, month: number): string[] {
 }
 
 export function payDaysOf(c: SalaryConfig, now: Date): number {
-  if (c.workDays) return Math.max(1, c.workDays.length)
+  // 手动勾的日期：只在「真的勾了」时才算数。
+  // 空数组曾经被 Math.max(1, 0) 兜成 1 天 —— 日薪直接变成整月工资（7000/1），
+  // 和 monthEarnedAt 退回 21 天的口径也对不上，所以这里跟着退回自动。
+  if (c.workDays && c.workDays.length > 0) return c.workDays.length
   return c.payDays && c.payDays > 0 ? c.payDays : payDaysAuto(now)
 }
 
@@ -104,13 +107,15 @@ export function monthEarnedAt(
 ): { earned: number; done: number; total: number; countsToday: boolean } {
   const y = now.getFullYear()
   const mo = now.getMonth()
-  const today = isoDate(now)
   const ym = `${y}-${String(mo + 1).padStart(2, '0')}`
   // 手动勾选的日期可能停留上个月，这里只认本月的；没有就退回周一到周五
   const picked = (c.workDays ?? []).filter((d) => d.startsWith(ym))
   const days = picked.length > 0 ? picked : monthWorkdays(y, mo)
-  const done = days.filter((d) => d < today).length
-  const countsToday = days.includes(today)
+  // 夜班跨零点：凌晨 / 白天那段属于「昨晚开始的那一班」，得记在它开始的那一天，
+  // 否则昨天整天先算满、今天再算一遍这一段，会重复计一次。
+  const shiftDay = isoDate(shiftDate(now, c))
+  const done = days.filter((d) => d < shiftDay).length
+  const countsToday = days.includes(shiftDay)
   const perDay = dailySalary(c, now)
   return {
     earned: done * perDay + (countsToday ? earnedAt(now, c) : 0),
@@ -139,6 +144,11 @@ function shiftOf(c: SalaryConfig): { s: number; e: number } {
   let e = minutesOf(c.end)
   if (e <= s) e += 24 * 60
   return { s, e }
+}
+
+/** 班次跨零点（22:00 → 06:00）：这种班里没有「上班前」那一段 */
+export function isOvernightShift(c: SalaryConfig): boolean {
+  return shiftOf(c).e > 24 * 60
 }
 
 /** 两段区间的并集长度（避免午休与晚休重叠时重复扣） */
@@ -236,6 +246,35 @@ function nowMinutes(now: Date): number {
   return now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60
 }
 
+/**
+ * 把「现在」换算成「这一班」里的相对分钟数。
+ *
+ * 跨零点的班次（22:00 → 06:00）凌晨那段属于**昨天开的这一班**，
+ * 所以 t 是在班次里数、而不是在一天里数：
+ *   t < 0        这一班还没开始（对夜班来说 = 昨夜那班已经收工）
+ *   0 ≤ t < 总长  正在上班
+ * 曾经直接用 0–1439 的钟点判断，导致 01:30 被判成「上班前、已赚 0」，
+ * 整夜只算 22:00–24:00 两个小时。
+ */
+function clockOf(now: Date, c: SalaryConfig) {
+  const { s, e } = shiftOf(c)
+  const overnight = e > 24 * 60
+  const raw = nowMinutes(now)
+  const tail = overnight && raw < e - 24 * 60
+  return { s, e, overnight, tail, t: raw - s + (tail ? 24 * 60 : 0) }
+}
+
+/** 这一班是哪一天开的（夜班 = 昨天开的那一班，一直到今晚开工前都算它） */
+function shiftDate(now: Date, c: SalaryConfig): Date {
+  const d = new Date(now)
+  d.setHours(0, 0, 0, 0)
+  const { s, overnight } = clockOf(now, c)
+  // 夜班在上班时间之前（凌晨的尾巴 + 白天那一段）都属于昨晚开的那一班；
+  // 这样同一班从头到尾都记在同一天，跨零点的瞬间不会忽然少算一天。
+  if (overnight && nowMinutes(now) < s) d.setDate(d.getDate() - 1)
+  return d
+}
+
 /** 从上班到 t 之间，真正在工作（已扣掉休息）的分钟数 */
 function workedMinutes(c: SalaryConfig, t: number): number {
   const { s, lunch, dinner } = timeline(c)
@@ -247,43 +286,45 @@ function workedMinutes(c: SalaryConfig, t: number): number {
 }
 
 export function startOf(now: Date, c: SalaryConfig): Date {
-  const { s } = timeline(c)
-  const d = new Date(now)
-  d.setHours(0, 0, 0, 0)
-  d.setMinutes(s)
+  const d = shiftDate(now, c)
+  d.setMinutes(shiftOf(c).s)
   return d
 }
 
 export function endOf(now: Date, c: SalaryConfig): Date {
-  const { e } = timeline(c)
-  const d = new Date(now)
-  d.setHours(0, 0, 0, 0)
-  d.setMinutes(e)
+  const d = shiftDate(now, c)
+  d.setMinutes(shiftOf(c).e)
   return d
 }
 
 export function phaseAt(now: Date, c: SalaryConfig): Phase {
-  const { s, e, lunch, dinner } = timeline(c)
-  const t = nowMinutes(now)
-  if (t < s) return 'before'
-  if (t >= e) return 'after'
-  if (lunch && t >= lunch.from && t < lunch.to) return 'lunch'
-  if (dinner && t >= dinner.from && t < dinner.to) return 'dinner'
+  const { s, e, overnight, t } = clockOf(now, c)
+  const { lunch, dinner } = timeline(c)
+  // 夜班白天那段算「下班后」（昨夜那班已经收工），不能算「上班前」——
+  // 否则这 16 小时里既看不到赚到的钱，也永远到不了「已结清」。
+  if (t < 0) return overnight ? 'after' : 'before'
+  const at = s + t
+  if (at >= e) return 'after'
+  if (lunch && at >= lunch.from && at < lunch.to) return 'lunch'
+  if (dinner && at >= dinner.from && at < dinner.to) return 'dinner'
   return 'working'
 }
 
 /** 今日已赚：按净工作秒数累加，休息期间不涨 */
 export function earnedAt(now: Date, c: SalaryConfig): number {
   const { s, e, work } = timeline(c)
-  const t = Math.min(Math.max(nowMinutes(now), s), e)
-  const earned = (workedMinutes(c, t) * 60 * dailySalary(c, now)) / (work * 60)
+  const { overnight, t } = clockOf(now, c)
+  // 夜班白天：这一班已经收工，按满勤算
+  const at = overnight && t < 0 ? e : Math.min(Math.max(s + t, s), e)
+  const earned = (workedMinutes(c, at) * 60 * dailySalary(c, now)) / (work * 60)
   return Math.min(Math.max(0, earned), dailySalary(c, now))
 }
 
 export function progressOf(now: Date, c: SalaryConfig): number {
   const { s, e, work } = timeline(c)
-  const t = Math.min(Math.max(nowMinutes(now), s), e)
-  return Math.min(1, Math.max(0, workedMinutes(c, t) / work))
+  const { overnight, t } = clockOf(now, c)
+  const at = overnight && t < 0 ? e : Math.min(Math.max(s + t, s), e)
+  return Math.min(1, Math.max(0, workedMinutes(c, at) / work))
 }
 
 export function remainingSeconds(now: Date, c: SalaryConfig): number {

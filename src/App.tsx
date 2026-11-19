@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import { Sidebar, type Tab } from './components/Sidebar'
 import { Immersive } from './components/Immersive'
 import { SiteFooter } from './components/SiteFooter'
@@ -16,9 +16,11 @@ import {
   type SalaryConfig,
 } from './lib/salary'
 
-export default function App() {  const [tab, setTab] = useState<Tab>(() =>
-    window.location.hash.replace('#/', '') === 'salary' ? 'salary' : 'ledger',
-  )
+const TAB_FROM_HASH = (hash: string): Tab =>
+  hash.replace('#/', '') === 'salary' ? 'salary' : 'ledger'
+
+export default function App() {
+  const [tab, setTab] = useState<Tab>(() => TAB_FROM_HASH(window.location.hash))
   // null = 这台设备上还没设置过工资，走引导页
   const [stored, setConfig] = useState<SalaryConfig | null>(() => loadConfig())
   const configured = stored !== null
@@ -38,6 +40,27 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
   useEffect(() => {
     window.location.hash = `#/${tab}`
   }, [tab])
+
+  /** 地址栏 ← → 要和页面同步：以前只写不读，按后退键 URL 变了、页面不动 */
+  useEffect(() => {
+    const sync = () => setTab(TAB_FROM_HASH(window.location.hash))
+    window.addEventListener('hashchange', sync)
+    window.addEventListener('popstate', sync)
+    return () => {
+      window.removeEventListener('hashchange', sync)
+      window.removeEventListener('popstate', sync)
+    }
+  }, [])
+
+  /** 预览状态 / 沉浸模式也写回地址：刷新、收藏、分享都能还原（replaceState 不塞历史） */
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (preview === 'auto') url.searchParams.delete('phase')
+    else url.searchParams.set('phase', preview)
+    if (immersive) url.searchParams.set('immersive', '1')
+    else url.searchParams.delete('immersive')
+    window.history.replaceState(null, '', url)
+  }, [preview, immersive])
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000)
@@ -93,13 +116,21 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
 
   const phase: Phase = phaseAt(viewNow, config)
 
-  const handleSave = (next: SalaryConfig) => {
-    const firstTime = stored === null
-    setConfig(next)
-    saveConfig(next)
-    setToast(firstTime ? '填好啦，开始给你数钱' : '设置已保存，账本马上生效')
-    if (firstTime) setTab('ledger')
-  }
+  // 回调保持引用稳定：这两个页面都在 memo 里，换新函数会让它们每秒重渲染
+  const handleSave = useCallback(
+    (next: SalaryConfig) => {
+      const firstTime = stored === null
+      setConfig(next)
+      saveConfig(next)
+      setToast(firstTime ? '填好啦，开始给你数钱' : '设置已保存，账本马上生效')
+      if (firstTime) setTab('ledger')
+    },
+    [stored],
+  )
+
+  const goSalary = useCallback(() => setTab('salary'), [])
+  const onPreview = useCallback((p: 'auto' | Phase) => setPreview(p), [])
+  const exitImmersive = useCallback(() => setImmersive(false), [])
 
   /** 全屏必须在点击事件里申请，放 effect 里会被浏览器的用户手势校验拦下 */
   const enterImmersive = () => {
@@ -109,63 +140,62 @@ export default function App() {  const [tab, setTab] = useState<Tab>(() =>
   }
 
   return (
-    <div className="app">
-      <Sidebar tab={tab} onChange={setTab} />
+    <MotionConfig reducedMotion="user">
+      <div className="app">
+        <Sidebar tab={tab} onChange={setTab} />
 
-      <main className="main">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={tab}
-            initial={narrow ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={narrow ? { opacity: 1 } : { opacity: 0, y: -8 }}
-            transition={narrow ? { duration: 0 } : { duration: 0.24, ease: 'easeOut' }}
-          >
-            {tab === 'ledger' ? (
-              <LedgerPage
-                config={config}
-                configured={configured}
-                now={viewNow}
-                phase={phase}
-                preview={preview}
-                onPreview={setPreview}
-                onGoSalary={() => setTab('salary')}
-                onImmersive={enterImmersive}
-              />
-            ) : (
-              <SalaryPage config={config} onSave={handleSave} />
-            )}
-          </motion.div>
+        <main className="main">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={tab}
+              initial={narrow ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={narrow ? { opacity: 1 } : { opacity: 0, y: -8 }}
+              transition={narrow ? { duration: 0 } : { duration: 0.24, ease: 'easeOut' }}
+            >
+              {tab === 'ledger' ? (
+                <LedgerPage
+                  config={config}
+                  configured={configured}
+                  now={viewNow}
+                  phase={phase}
+                  preview={preview}
+                  onPreview={onPreview}
+                  onGoSalary={goSalary}
+                  onImmersive={enterImmersive}
+                />
+              ) : (
+                <SalaryPage config={config} onSave={handleSave} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+
+        <SiteFooter />
+
+        <AnimatePresence>
+          {immersive && (
+            <Immersive config={config} now={viewNow} phase={phase} onExit={exitImmersive} />
+          )}
         </AnimatePresence>
-      </main>
 
-      <SiteFooter />
-
-      <AnimatePresence>
-        {immersive && (
-          <Immersive
-            config={config}
-            now={viewNow}
-            phase={phase}
-            onExit={() => setImmersive(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            className="toast"
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
-          >
-            <span className="toast__dot" />
-            {toast}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              className="toast"
+              role="status"
+              aria-live="polite"
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            >
+              <span className="toast__dot" />
+              {toast}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </MotionConfig>
   )
 }
 

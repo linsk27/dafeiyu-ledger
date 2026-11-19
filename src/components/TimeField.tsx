@@ -68,13 +68,18 @@ export function TimeField({ label, value, onChange, presets, hint, disabled }: P
 
   return (
     <div className={`timeField${disabled ? ' is-off' : ''}`} ref={boxRef}>
-      <span className="field__label">{label}</span>
+      <span className="field__label" id={`${label}-label`}>
+        {label}
+      </span>
       <button
         ref={btnRef}
         type="button"
         disabled={disabled}
         className={`input input--btn${open ? ' is-open' : ''}`}
         onClick={toggle}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={`${label} ${value}`}
       >
         <ClockIcon width={18} height={18} className="input__icon" />
         <span className="timeField__value numeric">{value}</span>
@@ -82,27 +87,33 @@ export function TimeField({ label, value, onChange, presets, hint, disabled }: P
       </button>
 
       {open && (
-        <div className={`timePop${up ? ' timePop--up' : ''}`}>
+        <div
+          className={`timePop${up ? ' timePop--up' : ''}`}
+          role="dialog"
+          aria-label={`选择${label}`}
+        >
           <div className="timePop__head">
             <span>选择时间</span>
             <b className="numeric">{value}</b>
           </div>
 
           <div className="timePop__body">
-            <div className="timePop__hours" ref={hourRef}>
+            <div className="timePop__hours" ref={hourRef} role="group" aria-label="小时">
               {HOURS.map((h) => (
                 <button
                   key={h}
                   type="button"
                   className={`timePop__hour numeric${h === hh ? ' is-on' : ''}`}
                   onClick={() => onChange(`${h}:${mm}`)}
+                  aria-pressed={h === hh}
+                  aria-label={`${Number(h)} 点`}
                 >
                   {h}
                 </button>
               ))}
             </div>
 
-            <div className="timePop__minutes">
+            <div className="timePop__minutes" role="group" aria-label="分钟">
               {MINUTES.map((m) => (
                 <button
                   key={m}
@@ -112,6 +123,8 @@ export function TimeField({ label, value, onChange, presets, hint, disabled }: P
                     onChange(`${hh}:${m}`)
                     setOpen(false)
                   }}
+                  aria-pressed={m === mm}
+                  aria-label={`${Number(m)} 分`}
                 >
                   {m}
                 </button>

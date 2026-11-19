@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { SparkIcon, WalletIcon } from '../components/Icons'
 import { DayPicker } from '../components/DayPicker'
@@ -29,7 +29,12 @@ const LUNCH_END_PRESETS = ['13:00', '13:30', '14:00']
 const DINNER_START_PRESETS = ['17:30', '18:00', '18:30']
 const DINNER_END_PRESETS = ['18:30', '19:00', '19:30']
 
-export function SalaryPage({ config, onSave }: Props) {
+/**
+ * 薪资页只在「配置变了」或用户在填表时才需要重渲染。
+ * 父组件每秒都在 setNow 推进数字，这里用 memo 把整页挡在门外——
+ * 表单有几十个输入框，每秒重渲染一遍是纯浪费。
+ */
+export const SalaryPage = memo(function SalaryPage({ config, onSave }: Props) {
   const [draft, setDraft] = useState<SalaryConfig>(config)
   const now = new Date()
 
@@ -91,6 +96,8 @@ export function SalaryPage({ config, onSave }: Props) {
   }
   const lunchMinutes = lunch.span ? lunch.span.to - lunch.span.from : 0
   const dinnerMinutes = dinner.span ? dinner.span.to - dinner.span.from : 0
+  // 手动模式下一个日期都没勾：不能保存，否则日薪会变成「月薪 / 1」
+  const noDays = draft.workDays !== null && draft.workDays.length === 0
 
   return (
     <div className="page page--salary">
@@ -162,7 +169,8 @@ export function SalaryPage({ config, onSave }: Props) {
                     type="button"
                     className={draft.workDays !== null ? 'is-on' : ''}
                     onClick={() => {
-                      if (draft.workDays) return
+                      // 已经勾过就保持原样；勾空（[]）时允许重新铺一遍默认工作日
+                      if (draft.workDays && draft.workDays.length > 0) return
                       const now2 = new Date()
                       update('workDays', monthWorkdays(now2.getFullYear(), now2.getMonth()))
                       update('payDays', null)
@@ -257,10 +265,17 @@ export function SalaryPage({ config, onSave }: Props) {
             )}
           </div>
 
+          {noDays && (
+            <p className="formWarn">
+              一个计薪日都没勾：这样日薪会算成整月工资。至少勾一天，或者切回「自动」。
+            </p>
+          )}
+
           <div className="formFoot">
             <button
               className="btn btn--primary"
               type="button"
+              disabled={noDays}
               onClick={() => onSave(clampConfig(draft))}
             >
               保存设置
@@ -333,7 +348,7 @@ export function SalaryPage({ config, onSave }: Props) {
       </div>
     </div>
   )
-}
+})
 
 /** 一段休息的小标题 + 开关（没有这段休息的人直接关掉） */
 function BreakHead({

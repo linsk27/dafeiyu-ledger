@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+
 import { MoneyCounter } from './MoneyCounter'
 import { ClockIcon } from './Icons'
 import {
@@ -242,14 +242,7 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
             )}
 
             {canPoke && !poking && (
-              <motion.span
-                className="stage__poke"
-                initial={{ opacity: 0, y: 8, scale: 0.9 }}
-                animate={{ opacity: [0.75, 1, 0.75], y: 0, scale: [1, 1.05, 1] }}
-                transition={{ duration: 2.4, repeat: Infinity, delay: 0.5, ease: 'easeInOut' }}
-              >
-                戳我
-              </motion.span>
+              <span className="stage__poke">戳我</span>
             )}
           </span>
         </button>
@@ -279,10 +272,10 @@ export function Stage({ config, now, phase, variant = 'card' }: Props) {
             <span className="stage__meterValue numeric">{Math.round(progress * 100)}%</span>
           </div>
           <div className="stage__bar">
-            <motion.div
+            {/* 宽度交给 CSS transition，弹簧手感用 ease-out 曲线近似 */}
+            <div
               className="stage__barFill"
-              animate={{ width: `${Math.max(2, progress * 100)}%` }}
-              transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+              style={{ width: `${Math.max(2, progress * 100)}%` }}
             />
           </div>
         </div>

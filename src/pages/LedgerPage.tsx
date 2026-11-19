@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+
 import { Stage } from '../components/Stage'
 import { SparkIcon } from '../components/Icons'
 import {
@@ -205,16 +205,14 @@ function StatCard({
   delay: number
 }) {
   return (
-    <motion.div
-      className={`statCard statCard--${tone}`}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, type: 'spring', stiffness: 200, damping: 24 }}
+    <div
+      className={`statCard statCard--${tone} rise`}
+      style={{ animationDelay: `${delay}s` }}
     >
       <div className="statCard__label">{label}</div>
       <div className="statCard__value numeric">{value}</div>
       <div className="statCard__note">{note}</div>
-    </motion.div>
+    </div>
   )
 }
 

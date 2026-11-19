@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import { Sidebar, type Tab } from './components/Sidebar'
 import { Immersive } from './components/Immersive'
 import { SiteFooter } from './components/SiteFooter'
@@ -66,9 +65,6 @@ export default function App() {
     const id = window.setInterval(() => setNow(new Date()), 1000)
     return () => window.clearInterval(id)
   }, [])
-
-  /** 窄屏（手机）直接换页，不做转场 —— 两层页面同时重绘太重，会掉帧 */
-  const narrow = useNarrowScreen()
 
   useEffect(() => {
     if (!toast) return
@@ -140,75 +136,41 @@ export default function App() {
   }
 
   return (
-    <MotionConfig reducedMotion="user">
-      <div className="app">
-        <Sidebar tab={tab} onChange={setTab} />
+    <div className="app">
+      <Sidebar tab={tab} onChange={setTab} />
 
-        <main className="main">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={tab}
-              initial={narrow ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={narrow ? { opacity: 1 } : { opacity: 0, y: -8 }}
-              transition={narrow ? { duration: 0 } : { duration: 0.24, ease: 'easeOut' }}
-            >
-              {tab === 'ledger' ? (
-                <LedgerPage
-                  config={config}
-                  configured={configured}
-                  now={viewNow}
-                  phase={phase}
-                  preview={preview}
-                  onPreview={onPreview}
-                  onGoSalary={goSalary}
-                  onImmersive={enterImmersive}
-                />
-              ) : (
-                <SalaryPage config={config} onSave={handleSave} />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </main>
-
-        <SiteFooter />
-
-        <AnimatePresence>
-          {immersive && (
-            <Immersive config={config} now={viewNow} phase={phase} onExit={exitImmersive} />
+      <main className="main">
+        {/* key 换页 = 重挂一次，进场动画交给 CSS（.pageWrap），比 JS 动画少一层 */}
+        <div className="pageWrap" key={tab}>
+          {tab === 'ledger' ? (
+            <LedgerPage
+              config={config}
+              configured={configured}
+              now={viewNow}
+              phase={phase}
+              preview={preview}
+              onPreview={onPreview}
+              onGoSalary={goSalary}
+              onImmersive={enterImmersive}
+            />
+          ) : (
+            <SalaryPage config={config} onSave={handleSave} />
           )}
-        </AnimatePresence>
+        </div>
+      </main>
 
-        <AnimatePresence>
-          {toast && (
-            <motion.div
-              className="toast"
-              role="status"
-              aria-live="polite"
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            >
-              <span className="toast__dot" />
-              {toast}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </MotionConfig>
+      <SiteFooter />
+
+      {immersive && (
+        <Immersive config={config} now={viewNow} phase={phase} onExit={exitImmersive} />
+      )}
+
+      {toast && (
+        <div className="toast" role="status" aria-live="polite" key={toast}>
+          <span className="toast__dot" />
+          {toast}
+        </div>
+      )}
+    </div>
   )
-}
-
-/** 窄屏判定：手机上一律不做转场动画，直接换页最跟手 */
-function useNarrowScreen() {
-  const query = '(max-width: 700px)'
-  const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches)
-  useEffect(() => {
-    const mq = window.matchMedia(query)
-    const sync = () => setNarrow(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
-  return narrow
 }

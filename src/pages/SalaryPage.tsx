@@ -1,5 +1,4 @@
 import { memo, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import { SparkIcon, WalletIcon } from '../components/Icons'
 import { DayPicker } from '../components/DayPicker'
 import { TimeField } from '../components/TimeField'
@@ -113,12 +112,7 @@ export const SalaryPage = memo(function SalaryPage({ config, onSave }: Props) {
       </header>
 
       <div className="salaryGrid">
-        <motion.section
-          className="card card--form"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 26 }}
-        >
+        <section className="card card--form rise">
           <div className="card__head card__head--row">
             <div>
               <h2 className="card__title">工资设置</h2>
@@ -288,14 +282,9 @@ export const SalaryPage = memo(function SalaryPage({ config, onSave }: Props) {
               {preview.hours.toFixed(1)} h
             </span>
           </div>
-        </motion.section>
+        </section>
 
-        <motion.aside
-          className="card card--receipt"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.06, type: 'spring', stiffness: 200, damping: 26 }}
-        >
+        <aside className="card card--receipt rise" style={{ animationDelay: '0.06s' }}>
           <div className="receipt__head">
             <span className="receipt__title">算一算</span>
             <span className="receipt__live">
@@ -344,7 +333,7 @@ export const SalaryPage = memo(function SalaryPage({ config, onSave }: Props) {
             <SparkIcon width={13} height={13} />
             每秒 = 月薪 ÷ {preview.payDays} 天 ÷（班次 − 休息）秒数
           </p>
-        </motion.aside>
+        </aside>
       </div>
     </div>
   )

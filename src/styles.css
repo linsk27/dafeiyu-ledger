@@ -326,6 +326,29 @@ button {
   padding: 12px 16px 22px 0;
 }
 
+/* 换页：key 一变就重挂，让这段动画重播（手机上直接换页，不做转场） */
+.pageWrap {
+  animation: pageIn 0.24s ease-out both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 手机上换页直接切：两层页面同时重绘会掉帧 */
+@media (max-width: 1080px) {
+  .pageWrap {
+    animation: none;
+  }
+}
+
 .page {
   display: flex;
   flex-direction: column;
@@ -984,6 +1007,8 @@ button {
   border-radius: 999px;
   background: linear-gradient(90deg, #7aa2ff, #4b7bf5 60%, #3f63e0);
   box-shadow: 0 0 14px rgba(75, 123, 245, 0.55);
+  /* 进度条每秒挪一点：给个缓和曲线，别一格一格地跳 */
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stage.is-after .stage__barFill {
@@ -1151,6 +1176,42 @@ button {
   box-shadow: 0 12px 22px -12px rgba(10, 168, 118, 0.95);
   white-space: nowrap;
   z-index: 4;
+  /* 飘一颗小药丸：起→升→淡出，位置和角度由行内 --pop-x / --pop-rot 给 */
+  animation: popFloat 1.55s cubic-bezier(0.25, 0.8, 0.4, 1) both;
+}
+
+@keyframes popFloat {
+  0% {
+    opacity: 0;
+    transform: translate(var(--pop-x, 0), 6px) scale(0.6) rotate(0deg);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(calc(var(--pop-x, 0) / 2), -6px) scale(1) rotate(calc(var(--pop-rot, 0deg) / 2));
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--pop-x, 0), -44px) scale(0.92) rotate(var(--pop-rot, 0deg));
+  }
+}
+
+/* 卡片进场：换页/首次渲染时轻轻抬起，delay 由行内 animation-delay 控制 */
+.rise {
+  animation: riseIn 0.42s cubic-bezier(0.22, 0.85, 0.28, 1) both;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---------- stat cards ---------- */
@@ -1409,6 +1470,18 @@ button {
   font-size: 13px;
   box-shadow: 0 22px 40px -20px rgba(27, 37, 89, 0.9);
   z-index: 50;
+  animation: toastIn 0.28s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .toast__dot {
@@ -1865,6 +1938,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: immersiveIn 0.28s ease-out both;
   padding: calc(24px + var(--safe-top)) calc(30px + var(--safe-right)) calc(18px + var(--safe-bottom))
     calc(30px + var(--safe-left));
   color: #fff;
@@ -1872,6 +1946,17 @@ button {
     radial-gradient(900px 620px at 12% -6%, #2c3d78 0%, rgba(44, 61, 120, 0) 62%),
     radial-gradient(760px 520px at 100% 0%, #1b4f6b 0%, rgba(27, 79, 107, 0) 60%),
     linear-gradient(160deg, #131b3a 0%, #0d1229 100%);
+}
+
+@keyframes immersiveIn {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .immersive__top {
@@ -2090,6 +2175,19 @@ button {
   letter-spacing: 0.5px;
   box-shadow: 0 12px 20px -12px rgba(255, 159, 104, 0.95);
   pointer-events: none;
+  animation: pokeBreath 2.4s ease-in-out 0.5s infinite;
+}
+
+@keyframes pokeBreath {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05);
+  }
 }
 
 /* ---------- 沉浸模式顶部动作区 ---------- */

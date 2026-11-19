@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { fmtMoney } from '../lib/salary'
 
 interface Pop {
@@ -15,10 +14,21 @@ interface Props {
   caption?: string
 }
 
+/** 飘字活多久：CSS 里 .pop 的动画时长减 50ms，动画播完就把它摘掉 */
+const POP_MS = 1550
+
 export function MoneyCounter({ value, active, caption }: Props) {
   const prev = useRef(value)
   const [pops, setPops] = useState<Pop[]>([])
   const [flash, setFlash] = useState(false)
+  const timers = useRef<number[]>([])
+
+  useEffect(() => {
+    return () => {
+      timers.current.forEach((t) => window.clearTimeout(t))
+      timers.current = []
+    }
+  }, [])
 
   useEffect(() => {
     const delta = value - prev.current
@@ -34,6 +44,13 @@ export function MoneyCounter({ value, active, caption }: Props) {
       rot: (Math.random() - 0.5) * 14,
     }
     setPops((list) => [...list.slice(-4), pop])
+    // 以前靠 onAnimationComplete 收尾，现在动画在 CSS 里，用定时器对时
+    const kill = window.setTimeout(() => {
+      setPops((list) => list.filter((it) => it.id !== pop.id))
+      timers.current = timers.current.filter((t) => t !== kill)
+    }, POP_MS)
+    timers.current.push(kill)
+
     setFlash(true)
     const t = window.setTimeout(() => setFlash(false), 280)
     return () => window.clearTimeout(t)
@@ -44,21 +61,15 @@ export function MoneyCounter({ value, active, caption }: Props) {
       <div className="money__glow" />
 
       <div className="money__pops" aria-hidden>
-        <AnimatePresence>
-          {pops.map((p) => (
-            <motion.span
-              key={p.id}
-              className="pop numeric"
-              initial={{ opacity: 0, y: 6, x: p.x, scale: 0.6, rotate: 0 }}
-              animate={{ opacity: 1, y: -30, scale: 1, rotate: p.rot }}
-              exit={{ opacity: 0, y: -44, scale: 0.9 }}
-              transition={{ duration: 1.25, ease: 'easeOut' }}
-              onAnimationComplete={() => setPops((list) => list.filter((it) => it.id !== p.id))}
-            >
-              +{p.delta.toFixed(4)}
-            </motion.span>
-          ))}
-        </AnimatePresence>
+        {pops.map((p) => (
+          <span
+            key={p.id}
+            className="pop numeric"
+            style={{ '--pop-x': `${p.x}px`, '--pop-rot': `${p.rot}deg` } as CSSProperties}
+          >
+            +{p.delta.toFixed(4)}
+          </span>
+        ))}
       </div>
 
       <div className="money__label">

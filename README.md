@@ -120,7 +120,10 @@
 
 ## 技术栈
 
-React 19 · Vite 6 · TypeScript · framer-motion · Capacitor 7（Android）
+React 19 · Vite 6 · TypeScript · Capacitor 7（Android）
+
+没有动画库：进场、飘字、进度条、侧栏选中态都是 CSS 动画；换标签时那块蓝色药丸用
+Web Animations API 做 FLIP（`Sidebar.tsx`），所以 `prefers-reduced-motion` 一开就全停。
 
 ```text
 src/
@@ -134,7 +137,7 @@ src/
   components/Immersive.tsx     全屏激励器
   pages/LedgerPage.tsx    我的账本
   pages/SalaryPage.tsx    薪资管理
-  styles.css              全部样式（无 UI 框架）
+  styles.css              全部样式 + 动画关键帧（无 UI 框架、无动画库）
 public/assets/            角色立绘、背景、光标（全部本地）
 public/fonts/             站酷快乐体 + Baloo 2
 ```
@@ -204,7 +207,7 @@ git add -A && git commit -m "deploy" && git push -f <remote> gh-pages:gh-pages
 
 ## 体积与缓存
 
-首屏要下载的东西从 **1.5 MB 压到了 ~450 KB**（brotli 后），主要三件事：
+首屏要下载的东西从 **1.5 MB 压到了 ~410 KB**（brotli 后），主要四件事：
 
 | 资源 | 之前 | 现在 | 做法 |
 |---|---|---|---|
@@ -213,6 +216,7 @@ git add -A && git commit -m "deploy" && git push -f <remote> gh-pages:gh-pages
 | 背景图（4 张） | 1.05 MB | **0.43 MB** | 转 WebP（保留 2560 宽，大屏不糊） |
 | 加载动画 | 76 KB | 57 KB | 同上（480 宽，三倍屏也不糊） |
 | 点一下才用的动作图 | 首屏就下载 250 KB | 延迟加载，只在鼠标靠近 / 1.2s 后挂载 | `Stage.tsx` 的 `pokeArmed` |
+| JS 包 | 378 KB（gzip 121 KB） | **263 KB（gzip 83 KB）** | 去掉 framer-motion，动画交给 CSS |
 
 两个脚本都放在 `scripts/` 下，改了图或加了界面文案就重跑一次：
 
